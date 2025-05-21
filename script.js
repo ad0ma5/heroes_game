@@ -39,6 +39,7 @@
         function goInit(){
             if(dirtSpriteLoaded && unitSpriteLoaded){
                 // Initialize
+
                 switchMode('game');
                 loadMap();
             }
@@ -262,12 +263,32 @@
         }
 
         function loadMap() {
+                console.log('load?');
             const savedMap = localStorage.getItem('gameMap');
             const savedUnits = localStorage.getItem('gameUnits');
             if (savedMap && savedUnits) {
+                console.log('load saved?');
                 gameMap = JSON.parse(savedMap);
                 gameUnits = JSON.parse(savedUnits);
                 drawGame();
+            }else{
+
+                console.log('preload?');
+
+                fetch("game.json")
+                  .then(response => response.json())
+                  .then(savedMap => { 
+                        console.log(savedMap) 
+                        gameMap = savedMap;
+                        drawGame();
+                   });
+                fetch("units.json")
+                  .then(response => response.json())
+                  .then(savedUnits => { 
+                        console.log(savedUnits) 
+                        gameUnits = savedUnits;
+                        drawGame();
+                   });
             }
         }
 

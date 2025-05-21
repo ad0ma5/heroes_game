@@ -1,0 +1,1 @@
+[{"x":4,"y":3,"type":"knight","player":2,"health":100,"attack":20,"move":1,"movesLeft":5},{"x":2,"y":2,"type":"knight","player":1,"health":90,"attack":20,"move":1,"movesLeft":5},{"x":4,"y":10,"type":"archer","player":1,"health":50,"attack":10,"move":2,"movesLeft":6},{"x":2,"y":4,"type":"archer","player":2,"health":50,"attack":10,"move":2,"movesLeft":6}]
