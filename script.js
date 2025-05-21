@@ -200,9 +200,27 @@
             */
         }
 
+        function checkWin(){
+            let count1 = 0;
+            let count2 = 0;
+            gameUnits.forEach(unit => {
+                if(unit.player === 1) count1++;
+                else count2++;
+            });
+            if(count1 ===0){
+                alert("player 2 won!!!");
+                loadMap();
+            }
+            if(count2 ===0){
+                alert("player 1 won!!!");
+                loadMap();
+            }
+
+        }
         function getUnitAt(x, y) {
             return gameUnits.find(unit => unit.x === x && unit.y === y);
         }
+
 
         gameCanvas.addEventListener('click', (e) => {
             if (mode !== 'game') return;
@@ -210,6 +228,7 @@
             const x = Math.floor((e.clientX - rect.left) / cellSize);
             const y = Math.floor((e.clientY - rect.top) / cellSize);
             const unit = getUnitAt(x, y);
+            console.log('click over ', x,y, gameMap[y][x], unit)
             if (unit && unit.player === currentPlayer && !selectedUnit) {
                 selectedUnit = unit;
                 drawGame();
@@ -223,7 +242,9 @@
                         selectedUnit.movesLeft -= movesPerAttack;
                         if (unit.health <= 0) {
                             gameUnits = gameUnits.filter(u => u !== unit);
+                            checkWin();
                         }
+
                     }
                 } else if (!unit &&  movesToDo <= selectedUnit.move ) {
 
@@ -246,6 +267,11 @@
                 selectedUnit = null;
 
                 drawGame();
+            }else{
+                let pass = "passable terrain";
+                if(["grass","dirt","road","castle"].indexOf(gameMap[y][x]) === -1)
+                    pass =  "non"+pass;
+                selectedStatus.innerHTML = JSON.stringify(gameMap[y][x])+ " is "+pass;
             }
         });
 
