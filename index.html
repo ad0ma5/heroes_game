@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Heroes Strategy Game</title>
+        <style>
+        body {
+            font-family: Arial, sans-serif;
+            flex-direction: column;
+            background-color: #f0f0f0;
+        }
+        body.active{background: lightgreen;}
+        #game-container, #editor-container {
+            display: none;
+        }
+        #game-container.active, #editor-container.active {
+            display: block;
+            padding: 20px;
+        }
+        canvas {
+            border: 2px solid #333;
+            background-color: #fff;
+            overflow:auto;
+        }
+        #controls, #editor-controls {
+            position:fixed;
+            top: 10px;
+            border: solid 1px black;
+            background: white;
+            padding: 2px;
+            right: 1%;
+        }
+        #editor-controls {
+            top:50px;
+        }
+        button {
+            margin: 5px;
+            padding: 2px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        select {
+            padding: 5px;
+            font-size: 16px;
+        }
+        #status {
+            margin: 10px;
+            font-size: 18px;
+        }
+        #status,
+        #selected_status{
+            position:fixed;
+            border: solid 1px black;
+            padding: 2px;
+            top:70px;
+            right:15%;
+            background: white;
+        }
+        #status{
+            right:1%;
+        }
+        #selected_status:empty {
+          display: none;
+        }
+        #mode-controls{
+            border: solid 1px black;
+            position:fixed;
+            display:inline-block;
+            right:30%;
+            background: white;
+            padding: 2px;
+        }
+        li{
+            list-style-type: none;
+        }
+        ul{
+            padding:0;
+            margin: 0;
+        }
+        h1{
+            border: solid 1px black;
+            position:fixed;
+            margin: 0;
+            display: inline-block;
+            background: white;
+            padding: 2px;
+        }
+        </style>
+    </head>
+    <body>
+        <canvas id="anime-canvas" width="150" height="200" style="position:absolute; left: 0; top: 0; display: none"></canvas>
+        <h1>Heroes Strategy Game</h1> 
+        <div id="mode-controls">
+            <button onclick="switchMode('game')">Play Game</button>
+            <button onclick="switchMode('editor')">Map Editor</button>
+        </div>
+
+               <div id="game-container">
+            <div id="controls">
+                <button onclick="endTurn()">End Turn</button>
+                <button onclick="loadMap()">Load Map</button>
+            </div>
+            <div id="status">Player 1's Turn</div>
+            <div id="selected_status"></div>
+            <canvas id="game-canvas" width="800" height="800"></canvas>
+        </div>
+        <div id="editor-container">
+            <canvas id="editor-canvas" width="800" height="800"></canvas>
+            <div id="editor-controls">
+                <select id="terrain-type">
+                    <option value="dirt">Dirt</option>
+                    <option value="grass">Grass</option>
+                    <option value="forest">Forest</option>
+                    <option value="mountain">Mountain</option>
+                    <option value="water">Water</option>
+                    <option value="road">Road</option>
+                    <option value="castle">Castle</option>
+                </select>
+                <select id="unit-type">
+                    <option value="none">None</option>
+                    <option value="knight">Knight</option>
+                    <option value="archer">Archer</option>
+                </select>
+                <select id="player-type">
+                    <option value="0">No Player</option>
+                    <option value="1">Player 1</option>
+                    <option value="2">Player 2</option>
+                </select>
+                <button onclick="saveMap()">Save Map</button>
+                <button onclick="clearMap()">Clear Map</button>
+            </div>
+        </div>
+        <script src="script.js"></script>
+    </body>
+</html>
