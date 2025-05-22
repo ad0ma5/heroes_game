@@ -9,6 +9,8 @@
         const gridSize = 20;
         const cellSize = 40;
         let currentPlayer = 1;
+        let players = [newPlayer(1),newPlayer(2)];
+        let currentPlayerObj = players[0];
         let selectedUnit = null;
         let gameMap = createEmptyMap();
         let gameUnits = [];
@@ -17,6 +19,7 @@
 
         let dirtSpriteLoaded = false;
         let unitSpriteLoaded = false;
+
         //ASSETS
         //const dirt = new Image();
         //dirt.src = "dirt.png";
@@ -36,10 +39,17 @@
             goInit();
         }
 
+        function newPlayer(id){
+            return {
+                id: id,
+                money: 0,
+                exp: 0,
+                level: 1,
+            }
+        }
         function goInit(){
             if(dirtSpriteLoaded && unitSpriteLoaded){
                 // Initialize
-
                 switchMode('game');
                 loadMap();
             }
@@ -51,9 +61,7 @@
         function switchMode(newMode) {
             mode = newMode;
             document.getElementById('game-container').classList.toggle('active', mode === 'game');
-
             document.body.classList.toggle('active', mode === 'game');
-
             document.getElementById('editor-container').classList.toggle('active', mode === 'editor');
             if (mode === 'game') {
                 drawGame();
@@ -62,7 +70,6 @@
             }
         }
 
-        // Game Logic
         const SPRITE_WIDTH = cellSize;
         const SPRITE_HEIGHT = cellSize;
         const DIRT_SPRITE_WIDTH = 90;
@@ -136,6 +143,13 @@
                             x * cellSize, y* cellSize,
                             DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT
                         );
+                    else if(gameMap[y][x] === 'well')
+                        ctx.drawImage(
+                            dirtSprite,
+                            5, 830, DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT,
+                            x * cellSize, y* cellSize,
+                            DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT
+                        );
                 }
             }
         }
@@ -169,35 +183,28 @@
                 ctx.strokeStyle = 'black';
             }
         }
-        function drawSelected(){
-           selectedStatus.innerHTML = `<ul><li>type=${selectedUnit.type} </li><li>movesLeft=${selectedUnit.movesLeft} </li><li>health= ${selectedUnit.health} </li><li>attack=${selectedUnit.attack}</li></ul>`;
+        function printUnit(unit){
+           return `<ul>
+                <li>type=${unit.type} </li>
+                <li>movesLeft=${unit.movesLeft} </li>
+                <li>health= ${unit.health} </li>
+                <li>attack=${unit.attack}</li>
+            </ul>`;
         }
 
         function drawGame() {
             gameCtx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
-
             drawGrid(gameCtx);
-
             drawUnits(gameCtx);
-            if(selectedUnit) drawSelected();
+            if(selectedUnit) selectedStatus.innerHTML = printUnit(selectedUnit);
             else selectedStatus.innerHTML = '';
         }
 
         // Editor Logic
         function drawEditor() {
             editorCtx.clearRect(0, 0, editorCanvas.width, editorCanvas.height);
-
             drawGrid(editorCtx);
-
             drawUnits(editorCtx);
-
-            /*
-            gameUnits.forEach(unit => {
-                //editorCtx.font = '30px "Font Awesome 6 Free"';
-                editorCtx.fillStyle = unit.player === 1 ? 'blue' : 'red';
-                editorCtx.fillText(unit.type === 'knight' ? '\uf6de' : '\uf6e0', unit.x * cellSize + 10, unit.y * cellSize + 40);
-            });
-            */
         }
 
         function checkWin(){
@@ -271,12 +278,15 @@
                 let pass = "passable terrain";
                 if(["grass","dirt","road","castle"].indexOf(gameMap[y][x]) === -1)
                     pass =  "non"+pass;
-                selectedStatus.innerHTML = JSON.stringify(gameMap[y][x])+ " is "+pass;
+                let punit = '';
+                if(unit) punit = printUnit(unit);
+                selectedStatus.innerHTML = JSON.stringify(gameMap[y][x])+ " is "+pass +" "+ punit;
             }
         });
 
         function endTurn() {
             currentPlayer = currentPlayer === 1 ? 2 : 1;
+            currentPlayerObj = players[currentPlayer-1];
             selectedUnit = null;
             // refill moves left for units
             gameUnits.forEach(unit => {
@@ -284,9 +294,13 @@
             });
 
             if(currentPlayer === 1) turnCount++;
-            document.getElementById('status').textContent = `Player ${currentPlayer}'s Turn, turnCount=${turnCount} `;
+            document.getElementById('status').textContent = `Player ${currentPlayer}'s Turn, turnCount=${turnCount} ${printPlayer(currentPlayerObj)}`;
             drawGame();
         }
+        function printPlayer(player){
+            return `\nMoney:${currentPlayerObj.money} exp:${currentPlayerObj.exp}`;
+        }
+            
 
         function loadMap() {
                 console.log('load?');
