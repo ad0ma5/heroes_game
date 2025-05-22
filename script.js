@@ -1,6 +1,6 @@
 
         const passableTerrain = [
-                "grass","dirt","road","stoneroad","castle","shipyard","well","goldmine"        
+                "grass","dirt","road","stoneroad","castle","shipyard","well","goldmine","bridge"        
         ];
         const gameCanvas = document.getElementById('game-canvas');
         const gameCtx = gameCanvas.getContext('2d');
@@ -199,6 +199,13 @@
                             x * cellSize, y* cellSize,
                             DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT
                         );
+                    else if(gameMap[y][x] === 'bridge')
+                        ctx.drawImage(
+                            dirtSprite,
+                            5, 870, DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT,
+                            x * cellSize, y* cellSize,
+                            DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT
+                        );
 
                 }
             }
@@ -362,18 +369,12 @@
 
                 console.log('preload?');
 
-                fetch("game.json")
+                fetch("heroes.json")
                   .then(response => response.json())
-                  .then(savedMap => { 
-                        console.log(savedMap) 
-                        gameMap = savedMap;
-                        drawGame();
-                   });
-                fetch("units.json")
-                  .then(response => response.json())
-                  .then(savedUnits => { 
-                        console.log(savedUnits) 
-                        gameUnits = savedUnits;
+                  .then(saved => { 
+                        console.log(saved) 
+                        gameMap = saved.map;
+                        gameUnits = saved.units;
                         drawGame();
                    });
             }
