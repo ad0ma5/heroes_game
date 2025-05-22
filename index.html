@@ -102,7 +102,7 @@
                <div id="game-container">
             <div id="controls">
                 <button onclick="endTurn()">End Turn</button>
-                <button onclick="loadMap()">Load Map</button>
+                <button onclick="loadMap()">Load default Map</button>
             </div>
             <div id="status">Player 1's Turn, turnCount=0 Money:0 exp:0</div>
             <div id="selected_status"></div>
@@ -114,27 +114,40 @@
                 <select id="terrain-type">
                     <option value="dirt">Dirt</option>
                     <option value="grass">Grass</option>
+                    <option value="road">Road</option>
+                    <option value="stoneroad">Stone Road</option>
+
+                    <option value="lava">Lava</option>
+                    <option value="ice">Ice</option>
                     <option value="forest">Forest</option>
                     <option value="mountain">Mountain</option>
                     <option value="water">Water</option>
-                    <option value="road">Road</option>
+
                     <option value="castle">Castle</option>
                     <option value="well">Well</option>
+                    <option value="goldmine">Gold mine</option>
+                    <option value="shipyard">Shipyard</option>
                 </select>
                 <select id="unit-type">
                     <option value="none">None</option>
                     <option value="knight">Knight</option>
                     <option value="archer">Archer</option>
+                    <option value="goblin">Goblin</option>
                 </select>
                 <select id="player-type">
                     <option value="0">No Player</option>
                     <option value="1">Player 1</option>
                     <option value="2">Player 2</option>
                 </select>
+                <br />
                 <button onclick="saveMap()">Save Map</button>
                 <button onclick="clearMap()">Clear Map</button>
+                <button onclick="downloadMap()">Download Map</button>
+                <br />
+                <input type="file" name="file" onchange="readText(event)" />
             </div>
         </div>
+        <a id="downloadAnchorElem" style="display:none"></a>
         <script src="script.js"></script>
     </body>
 </html>

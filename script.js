@@ -1,4 +1,7 @@
 
+        const passableTerrain = [
+                "grass","dirt","road","stoneroad","castle","shipyard","well","goldmine"        
+        ];
         const gameCanvas = document.getElementById('game-canvas');
         const gameCtx = gameCanvas.getContext('2d');
         const movesPerAttack = 3;
@@ -39,6 +42,10 @@
             goInit();
         }
 
+        function isPassableTerrain(terrain){
+            if(passableTerrain.indexOf(terrain) === -1) return false;
+            return true;
+        }
         function newPlayer(id){
             return {
                 id: id,
@@ -78,12 +85,19 @@
         // Example row indexes for each type/player (customize based on your sprite sheet layout)
         const SPRITE_MAP = {
             knight: {
+                0: 6, // blue knight row
                 1: 0, // blue knight row
                 2: 1  // red knight row
             },
             archer: {
+                0: 7, // blue knight row
                 1: 2,
                 2: 3
+            },
+            goblin:{
+                0: 8, // blue knight row
+                1: 4,
+                2: 5
             }
         };
         function drawGrid(ctx){
@@ -136,6 +150,13 @@
                             x * cellSize, y* cellSize,
                             DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT
                         );
+                    else if(gameMap[y][x] === 'stoneroad')
+                        ctx.drawImage(
+                            dirtSprite,
+                            100, 485, DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT,
+                            x * cellSize, y* cellSize,
+                            DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT
+                        );
                     else if(gameMap[y][x] === 'castle')
                         ctx.drawImage(
                             dirtSprite,
@@ -150,6 +171,35 @@
                             x * cellSize, y* cellSize,
                             DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT
                         );
+                    else if(gameMap[y][x] === 'goldmine')
+                        ctx.drawImage(
+                            dirtSprite,
+                            50, 777, DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT,
+                            x * cellSize, y* cellSize,
+                            DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT
+                        );
+                    else if(gameMap[y][x] === 'shipyard')
+                        ctx.drawImage(
+                            dirtSprite,
+                            50, 825, DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT,
+                            x * cellSize, y* cellSize,
+                            DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT
+                        );
+                    else if(gameMap[y][x] === 'lava')
+                        ctx.drawImage(
+                            dirtSprite,
+                            685, 300, DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT,
+                            x * cellSize, y* cellSize,
+                            DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT
+                        );
+                    else if(gameMap[y][x] === 'ice')
+                        ctx.drawImage(
+                            dirtSprite,
+                            685, 200, DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT,
+                            x * cellSize, y* cellSize,
+                            DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT
+                        );
+
                 }
             }
         }
@@ -189,6 +239,7 @@
                 <li>movesLeft=${unit.movesLeft} </li>
                 <li>health= ${unit.health} </li>
                 <li>attack=${unit.attack}</li>
+                <li>player=${unit.player}</li>
             </ul>`;
         }
 
@@ -257,11 +308,7 @@
 
                     // Move if terain allows
                     if(
-                        (
-                        gameMap[y][x] === "castle" || 
-                        gameMap[y][x] === "grass" || 
-                        gameMap[y][x] === "road" || 
-                        gameMap[y][x] === "dirt") && movesToDo <= selectedUnit.movesLeft
+                        isPassableTerrain(gameMap[y][x]) && movesToDo <= selectedUnit.movesLeft
                     ){
 
                         selectedUnit.x = x;
@@ -276,7 +323,7 @@
                 drawGame();
             }else{
                 let pass = "passable terrain";
-                if(["grass","dirt","road","castle"].indexOf(gameMap[y][x]) === -1)
+                if(!isPassableTerrain(gameMap[y][x]))
                     pass =  "non"+pass;
                 let punit = '';
                 if(unit) punit = printUnit(unit);
@@ -344,7 +391,7 @@
             gameMap[y][x] = terrain;
             if (unitType !== 'none') {
                 gameUnits = gameUnits.filter(unit => unit.x !== x || unit.y !== y);
-                if (player !== 0) {
+                //if (player !== 0) {
                     gameUnits.push({
                         x, y, type: unitType, player,
                         health: unitType === 'knight' ? 100 : 50,
@@ -352,7 +399,7 @@
                         move: unitType === 'knight' ? 1 : 2,
                         movesLeft: unitType === 'knight' ? 5 : 6
                     });
-                }
+                //}
             } else {
                 gameUnits = gameUnits.filter(unit => unit.x !== x || unit.y !== y);
             }
@@ -371,6 +418,23 @@
             drawEditor();
         }
 
+        function downloadMap(){
+            var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({map:gameMap,units:gameUnits}));
+            var dlAnchorElem = document.getElementById('downloadAnchorElem');
+            dlAnchorElem.setAttribute("href",     dataStr     );
+            dlAnchorElem.setAttribute("download", "heroes.json");
+            dlAnchorElem.click();
+        }
+        async function readText(event) {
+          const file = event.target.files.item(0)
+          const text = await file.text();
+          
+            const obj = JSON.parse(text);
+            if (obj.map) gameMap = obj.map;
+            if (obj.units) gameUnits = obj.units;
+            console.log(obj);
+            drawEditor();
+        }
 ///////////////////////////////////////
 
         const animeCanvas = document.getElementById('anime-canvas');
