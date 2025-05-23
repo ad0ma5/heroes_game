@@ -4,6 +4,8 @@
         ];
         const unitsBlueprint = {
             "knight": {
+                "x":0,"y":0,
+                "type":"knight",
                 "health":100,
                 "attack":20,
                 "move":1,
@@ -12,6 +14,8 @@
                 "gold": 10
             },
             "archer": {
+                "x":0,"y":0,
+                "type":"archer",
                 "health":50,
                 "attack":10,
                 "move":2,
@@ -20,6 +24,8 @@
                 "gold": 5
             },
             "goblin": {
+                "x":0,"y":0,
+                "type":"goblin",
                 "health":70,
                 "attack":15,
                 "move":1,
@@ -28,6 +34,8 @@
                 "gold": 15
             },
             "coin": {
+                "x":0,"y":0,
+                "type":"coin",
                 "health":0,
                 "attack":0,
                 "move":0,
@@ -261,6 +269,27 @@
                     unit.x * cellSize, unit.y * cellSize,
                     SPRITE_WIDTH, SPRITE_HEIGHT
                 );
+                const px = unit.x * cellSize;
+                const py = unit.y * cellSize;
+                // Draw health bar above unit
+                const barWidth = cellSize - 4;
+                const barHeight = 6;
+                const hpRatio = unit.health / unitsBlueprint[unit.type].health;
+                const mvRatio = unit.movesLeft / unitsBlueprint[unit.type].movesLeft;
+
+                if(unit.health > 0){
+                gameCtx.fillStyle = 'black';
+                gameCtx.fillRect(px + 2, py , barWidth, barHeight);
+                gameCtx.fillStyle = hpRatio > 0.5 ? 'green' : hpRatio > 0.25 ? 'orange' : 'red';
+                gameCtx.fillRect(px + 2, py, barWidth * hpRatio, barHeight);
+                }
+                // Draw move bar
+                if(unit.movesLeft > 0){
+                gameCtx.fillStyle = 'black';
+                gameCtx.fillRect(px + 2, py + cellSize - barHeight, barWidth, barHeight);
+                gameCtx.fillStyle = mvRatio > 0.5 ? 'yellow' : mvRatio > 0.25 ? 'blue' : 'grey';
+                gameCtx.fillRect(px + 2, py + cellSize - barHeight, barWidth * mvRatio, barHeight);
+                }
                 //console.log('unit', unit, currentPlayer);
                 if(currentPlayer === unit.player){
                     if(unit.movesLeft === 0 ) 
@@ -288,6 +317,7 @@
                 <li>health= ${unit.health} </li>
                 <li>attack=${unit.attack}</li>
                 <li>player=${unit.player}</li>
+                <li>gold=${unit.gold}</li>
             </ul>`;
         }
 
@@ -313,15 +343,30 @@
                 if(unit.player === 1) count1++;
                 else count2++;
             });
+            console.log('checking win 1=',count1,'2=',count2);
             if(count1 ===0){
                 alert("player 2 won!!!");
+                reinit();
                 loadMap();
             }
             if(count2 ===0){
                 alert("player 1 won!!!");
+                reinit();
                 loadMap();
             }
 
+        }
+        function reinit(){
+            currentPlayer = 1;
+            currentPlayerObj = players[currentPlayer];
+            turnCount = 0;
+            document.getElementById('status').textContent = printPlayer(currentPlayerObj);
+            gameUnits.forEach(unit => {
+                let unitObj = Object.assign({}, unitsBlueprint[unit.type]);
+                unitObj.x = unit.x;
+                unitObj.y = unit.y;
+                unit = unitObj;
+            });
         }
         function getUnitAt(x, y) {
             return gameUnits.find(unit => unit.x === x && unit.y === y);
@@ -336,17 +381,30 @@
             const unit = getUnitAt(x, y);
             console.log('click over ', x,y, gameMap[y][x], unit)
             if (unit && unit.player === currentPlayer && !selectedUnit) {
+                if(!unit.gold) unit.gold = 0;
                 selectedUnit = unit;
                 drawGame();
             } else if (selectedUnit) {
                 let movesToDo = Math.abs(selectedUnit.x - x) + Math.abs(selectedUnit.y - y);
                         console.log('it will move',selectedUnit, movesToDo);
                 if (unit && unit.player !== currentPlayer ) {
+                    if(!unit.gold) unit.gold = 0;
+                        console.log('it will attack',selectedUnit, movesToDo);
                     // Attack
-                    if( movesPerAttack <= selectedUnit.movesLeft){
+                    if( unit.health === 0){
+                        selectedUnit.movesLeft -= movesToDo;
+                        selectedUnit.x = x;
+                        selectedUnit.y = y;
+                        selectedUnit.gold += unit.gold;
+                        gameUnits = gameUnits.filter(u => u !== unit);
+                    }
+                    else if( movesPerAttack <= selectedUnit.movesLeft ){
                         unit.health -= selectedUnit.attack;
                         selectedUnit.movesLeft -= movesPerAttack;
                         if (unit.health <= 0) {
+                            selectedUnit.x = x;
+                            selectedUnit.y = y;
+                            selectedUnit.gold += unit.gold;
                             gameUnits = gameUnits.filter(u => u !== unit);
                             checkWin();
                         }
@@ -385,15 +443,28 @@
             selectedUnit = null;
             // refill moves left for units
             gameUnits.forEach(unit => {
-                unit.movesLeft = unit.type === 'knight' ? 5 : 6
+                unit.movesLeft = unitsBlueprint[unit.type].movesLeft;
+                if(gameMap[unit.y][unit.x] === "well"){
+                    console.log('you are on the well');
+                    unit.health += 10;
+                    if(unit.health > unitsBlueprint[unit.type].health){ unit.health = unitsBlueprint[unit.type].health; }
+                }
+                if(gameMap[unit.y][unit.x] === "goldmine"){
+                    console.log('you are on the goldmine');
+                    unit.gold += 5;
+                }
+                if(gameMap[unit.y][unit.x] === "castle"){
+                    console.log('you are on the castle and if you have enough money you will gain one more unit');
+                    
+                }
             });
 
             if(currentPlayer === 1) turnCount++;
-            document.getElementById('status').textContent = `Player ${currentPlayer}'s Turn, turnCount=${turnCount} ${printPlayer(currentPlayerObj)}`;
+            document.getElementById('status').textContent = printPlayer(currentPlayerObj);
             drawGame();
         }
         function printPlayer(player){
-            return `\nMoney:${currentPlayerObj.money} exp:${currentPlayerObj.exp}`;
+            return `Player ${currentPlayer}'s Turn, turnCount=${turnCount} \nMoney:${player.money} exp:${{player}.exp}`;
         }
             
 
@@ -434,6 +505,14 @@
             if (unitType !== 'none') {
                 gameUnits = gameUnits.filter(unit => unit.x !== x || unit.y !== y);
                 //if (player !== 0) {
+                //let clone = Object.assign({}, userDetails)
+                let unitObj = Object.assign({}, unitsBlueprint[unitType]);
+                unitObj.x = x;
+                unitObj.y = y;
+                unitObj.player = player;
+                gameUnits.push(unitObj);
+                console.log('editor',unitObj,gameUnits);
+                /*
                     gameUnits.push({
                         x, y, type: unitType, player,
                         health: unitType === 'knight' ? 100 : 50,
@@ -441,6 +520,7 @@
                         move: unitType === 'knight' ? 1 : 2,
                         movesLeft: unitType === 'knight' ? 5 : 6
                     });
+                */
                 //}
             } else {
                 gameUnits = gameUnits.filter(unit => unit.x !== x || unit.y !== y);
