@@ -52,6 +52,7 @@
         const editorCanvas = document.getElementById('editor-canvas');
         const editorCtx = editorCanvas.getContext('2d');
         const selectedStatus = document.getElementById('selected_status');
+        const castleMenu = document.getElementById('castle_menu');
         const gridSize = 20;
         const cellSize = 40;
         let currentPlayer = 1;
@@ -85,6 +86,27 @@
             goInit();
         }
 
+        function showOverlay(msg){
+            const over = document.querySelector("#overlay p");
+            over.innerHTML = msg;
+            over.parentNode.style.display = "block";
+        }
+
+        function buy(type){
+            const price = unitsBlueprint[type].health*10;
+            if(selectedUnit.gold >= price){
+                selectedUnit.gold -= price;
+                let unitObj = Object.assign({}, unitsBlueprint[type]);
+                unitObj.player = currentPlayer;
+                unitObj.x = selectedUnit.x+1;
+                unitObj.y = selectedUnit.y;
+                gameUnits.push(unitObj);
+                drawUnits(gameCtx);
+                alert('bought');
+            }else{
+                alert('come back when you have '+price+'. you have only '+selectedUnit.gold );
+            }
+        }
         function isPassableTerrain(terrain){
             if(passableTerrain.indexOf(terrain) === -1) return false;
             return true;
@@ -115,6 +137,7 @@
             document.getElementById('editor-container').classList.toggle('active', mode === 'editor');
             if (mode === 'game') {
                 drawGame();
+                showOverlay("Turn for Player "+currentPlayer);
             } else {
                 drawEditor();
             }
@@ -372,8 +395,13 @@
             return gameUnits.find(unit => unit.x === x && unit.y === y);
         }
 
+        function printCastleMenu(){
+            console.log('menu for unit ',selectedUnit, ' player', currentPlayer);
+            castleMenu.style.display = "block";
+        }
 
         gameCanvas.addEventListener('click', (e) => {
+            castleMenu.style.display = "none";
             if (mode !== 'game') return;
             const rect = gameCanvas.getBoundingClientRect();
             const x = Math.floor((e.clientX - rect.left) / cellSize);
@@ -383,6 +411,10 @@
             if (unit && unit.player === currentPlayer && !selectedUnit) {
                 if(!unit.gold) unit.gold = 0;
                 selectedUnit = unit;
+                if(gameMap[y][x] === "castle"){
+                    //this unit is inside castle so lets present on usin select menu
+                    printCastleMenu();
+                }
                 drawGame();
             } else if (selectedUnit) {
                 let movesToDo = Math.abs(selectedUnit.x - x) + Math.abs(selectedUnit.y - y);
@@ -391,7 +423,7 @@
                     if(!unit.gold) unit.gold = 0;
                         console.log('it will attack',selectedUnit, movesToDo);
                     // Attack
-                    if( unit.health === 0){
+                    if( unit.health === 0 && selectedUnit.movesLeft >= movesToDo){
                         selectedUnit.movesLeft -= movesToDo;
                         selectedUnit.x = x;
                         selectedUnit.y = y;
@@ -452,16 +484,19 @@
                 if(gameMap[unit.y][unit.x] === "goldmine"){
                     console.log('you are on the goldmine');
                     unit.gold += 5;
+                    if(unit.type === "goblin"){
+                        unit.gold += 20;
+                    }
                 }
                 if(gameMap[unit.y][unit.x] === "castle"){
                     console.log('you are on the castle and if you have enough money you will gain one more unit');
                     
                 }
             });
-
             if(currentPlayer === 1) turnCount++;
             document.getElementById('status').textContent = printPlayer(currentPlayerObj);
             drawGame();
+            showOverlay("Turn for Player "+currentPlayer);
         }
         function printPlayer(player){
             return `Player ${currentPlayer}'s Turn, turnCount=${turnCount} \nMoney:${player.money} exp:${{player}.exp}`;
@@ -477,6 +512,7 @@
                 gameMap = JSON.parse(savedMap);
                 gameUnits = JSON.parse(savedUnits);
                 drawGame();
+                showOverlay("Turn for Player "+currentPlayer);
             }else{
 
                 console.log('preload?');
@@ -488,6 +524,7 @@
                         gameMap = saved.map;
                         gameUnits = saved.units;
                         drawGame();
+                        showOverlay("Turn for Player "+currentPlayer);
                    });
             }
         }
