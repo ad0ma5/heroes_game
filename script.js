@@ -2,6 +2,41 @@
         const passableTerrain = [
                 "grass","dirt","road","stoneroad","castle","shipyard","well","goldmine","bridge"        
         ];
+        const unitsBlueprint = {
+            "knight": {
+                "health":100,
+                "attack":20,
+                "move":1,
+                "movesLeft":5,
+                "player":0,
+                "gold": 10
+            },
+            "archer": {
+                "health":50,
+                "attack":10,
+                "move":2,
+                "movesLeft":6,
+                "player":0,
+                "gold": 5
+            },
+            "goblin": {
+                "health":70,
+                "attack":15,
+                "move":1,
+                "movesLeft":4,
+                "player":0,
+                "gold": 15
+            },
+            "coin": {
+                "health":0,
+                "attack":0,
+                "move":0,
+                "movesLeft":0,
+                "player":0,
+                "gold": 50
+            }
+        };
+
         const gameCanvas = document.getElementById('game-canvas');
         const gameCtx = gameCanvas.getContext('2d');
         const movesPerAttack = 3;
@@ -98,6 +133,9 @@
                 0: 8, // blue knight row
                 1: 4,
                 2: 5
+            },
+            coin:{
+                0: 9
             }
         };
         function drawGrid(ctx){
@@ -225,8 +263,11 @@
                 );
                 //console.log('unit', unit, currentPlayer);
                 if(currentPlayer === unit.player){
-                    ctx.strokeStyle = 'blue';
-                    ctx.lineWidth = 3;
+                    if(unit.movesLeft === 0 ) 
+                        ctx.strokeStyle = 'red';
+                    else
+                        ctx.strokeStyle = 'orange';
+                    ctx.lineWidth = 5;
                     ctx.strokeRect(unit.x * cellSize, unit.y * cellSize, cellSize, cellSize);
                     ctx.strokeStyle = 'black';
                 }
