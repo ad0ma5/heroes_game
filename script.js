@@ -74,6 +74,9 @@
         const dirtSprite = new Image();
         dirtSprite.src = "dirt_sprite.png"; // Your sprite sheet path
 
+        const dirtSpriteNew = new Image();
+        dirtSpriteNew.src = "dirt_sprite_new.png"; // Your sprite sheet path
+
         const unitSprite = new Image();
         unitSprite.src = "sprite.png"; // Your sprite sheet path
 
@@ -169,7 +172,51 @@
                 0: 9
             }
         };
+        const DIRT_SPRITE_MAP = {
+            dirt: [0,0],
+            grass: [0,1],
+            road: [0,2],
+            stoneroad: [0,3],
+
+            lava: [1,0],
+            ice: [1,1],
+            forest: [1,2],
+            mountain: [1,3],
+            water: [1,4],
+
+            castle: [2,0],
+            well: [2,1],
+            goldmine: [2,2],
+            shipyard: [2,3],
+            bridge: [2,4]
+        };
+        
+        function drawTerrain(ctx){
+            // Draw terrain
+            for (let y = 0; y < gridSize; y++) {
+                for (let x = 0; x < gridSize; x++) {
+                    const tile = gameMap[y][x];
+                    const sprite = DIRT_SPRITE_MAP[tile];
+                    const sx = sprite[1] * SPRITE_WIDTH +1;
+                    const sy = sprite[0] * SPRITE_HEIGHT +1;
+
+                    ctx.drawImage(
+                        dirtSpriteNew,
+                        sx, sy, SPRITE_WIDTH, SPRITE_HEIGHT,
+                        x * cellSize, y * cellSize,
+                        SPRITE_WIDTH, SPRITE_HEIGHT
+                    );
+
+                    ctx.strokeStyle = '#00000033';
+                    ctx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
+                }
+            }
+
+        }
+
         function drawGrid(ctx){
+
+            drawTerrain(ctx); return;
 
             //console.log('drawGrid', gameMap);
             for (let y = 0; y < gridSize; y++) {
@@ -177,6 +224,8 @@
                     ctx.fillStyle = gameMap[y][x] === 'grass' ? '#90EE90' : gameMap[y][x] === 'forest' ? '#228B22' : '#808080';
                     ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
                     ctx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
+
+
                     if(gameMap[y][x] === 'dirt')
                         ctx.drawImage(
                             dirtSprite,
@@ -280,6 +329,13 @@
             }
         }
         function drawUnits(ctx){
+            //check if currently drawing selected unit
+            if (selectedUnit) {
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 3;
+                ctx.strokeRect(selectedUnit.x * cellSize, selectedUnit.y * cellSize, cellSize, cellSize);
+                ctx.strokeStyle = 'black';
+            }
             gameUnits.forEach(unit => {
                 const spriteRow = SPRITE_MAP[unit.type][unit.player];
                 const spriteCol = 0; // You can animate later by incrementing this
@@ -296,14 +352,14 @@
                 const py = unit.y * cellSize;
                 // Draw health bar above unit
                 const barWidth = cellSize - 4;
-                const barHeight = 6;
+                const barHeight = 2;
                 const hpRatio = unit.health / unitsBlueprint[unit.type].health;
                 const mvRatio = unit.movesLeft / unitsBlueprint[unit.type].movesLeft;
 
                 if(unit.health > 0){
                 gameCtx.fillStyle = 'black';
                 gameCtx.fillRect(px + 2, py , barWidth, barHeight);
-                gameCtx.fillStyle = hpRatio > 0.5 ? 'green' : hpRatio > 0.25 ? 'orange' : 'red';
+                gameCtx.fillStyle = hpRatio > 0.5 ? 'lightgreen' : hpRatio > 0.25 ? 'orange' : 'red';
                 gameCtx.fillRect(px + 2, py, barWidth * hpRatio, barHeight);
                 }
                 // Draw move bar
@@ -319,19 +375,12 @@
                         ctx.strokeStyle = 'red';
                     else
                         ctx.strokeStyle = 'orange';
-                    ctx.lineWidth = 5;
-                    ctx.strokeRect(unit.x * cellSize, unit.y * cellSize, cellSize, cellSize);
+                    ctx.lineWidth = 2;
+                    ctx.strokeRect( (unit.x * cellSize)-2, (unit.y * cellSize)-2, cellSize+2, cellSize+2);
                     ctx.strokeStyle = 'black';
                 }
             });
 
-            //check if currently drawing selected unit
-            if (selectedUnit) {
-                ctx.strokeStyle = 'yellow';
-                ctx.lineWidth = 3;
-                ctx.strokeRect(selectedUnit.x * cellSize, selectedUnit.y * cellSize, cellSize, cellSize);
-                ctx.strokeStyle = 'black';
-            }
         }
         function printUnit(unit){
            return `<ul>
@@ -348,8 +397,8 @@
             gameCtx.clearRect(0, 0, gameCanvas.width, gameCanvas.height);
             drawGrid(gameCtx);
             drawUnits(gameCtx);
-            if(selectedUnit) selectedStatus.innerHTML = printUnit(selectedUnit);
-            else selectedStatus.innerHTML = '';
+            //if(selectedUnit) selectedStatus.innerHTML = printUnit(selectedUnit);
+            //else selectedStatus.innerHTML = '';
         }
 
         // Editor Logic
@@ -408,20 +457,30 @@
             const y = Math.floor((e.clientY - rect.top) / cellSize);
             const unit = getUnitAt(x, y);
             console.log('click over ', x,y, gameMap[y][x], unit)
-            if (unit && unit.player === currentPlayer && !selectedUnit) {
-                if(!unit.gold) unit.gold = 0;
-                selectedUnit = unit;
-                if(gameMap[y][x] === "castle"){
-                    //this unit is inside castle so lets present on usin select menu
-                    printCastleMenu();
+                let pass = "passable terrain";
+                if(!isPassableTerrain(gameMap[y][x]))
+                    pass =  "non"+pass;
+                let punit = '';
+                if(unit) punit = printUnit(unit);
+                selectedStatus.innerHTML = gameMap[y][x]+ " is "+pass +" "+ punit;
+
+            if (unit && unit.player === currentPlayer) {
+                if(  !selectedUnit || selectedUnit !== unit){
+                    if(!unit.gold) unit.gold = 0;
+                    selectedUnit = unit;
+                    if(gameMap[y][x] === "castle"){
+                        //this unit is inside castle so lets present on usin select menu
+                        printCastleMenu();
+                    }
+                    drawGame();
+                }else{
+                    selectedUnit = null;
                 }
-                drawGame();
             } else if (selectedUnit) {
                 let movesToDo = Math.abs(selectedUnit.x - x) + Math.abs(selectedUnit.y - y);
                         console.log('it will move',selectedUnit, movesToDo);
                 if (unit && unit.player !== currentPlayer ) {
                     if(!unit.gold) unit.gold = 0;
-                        console.log('it will attack',selectedUnit, movesToDo);
                     // Attack
                     if( unit.health === 0 && selectedUnit.movesLeft >= movesToDo){
                         selectedUnit.movesLeft -= movesToDo;
@@ -430,7 +489,13 @@
                         selectedUnit.gold += unit.gold;
                         gameUnits = gameUnits.filter(u => u !== unit);
                     }
-                    else if( movesPerAttack <= selectedUnit.movesLeft ){
+                    else if( 
+                        movesPerAttack <= selectedUnit.movesLeft 
+                        && 
+                        movesToDo <= selectedUnit.movesLeft 
+                        && 
+                        movesToDo <= selectedUnit.move 
+                    ){
                         unit.health -= selectedUnit.attack;
                         selectedUnit.movesLeft -= movesPerAttack;
                         if (unit.health <= 0) {
@@ -442,6 +507,7 @@
                         }
 
                     }
+                    console.log('it did attack',selectedUnit, movesToDo, movesPerAttack);
                 } else if (!unit &&  movesToDo <= selectedUnit.move ) {
 
                     // Move if terain allows
@@ -453,20 +519,18 @@
                         selectedUnit.y = y;
                         selectedUnit.movesLeft -= movesToDo;
                         console.log('it moved',selectedUnit);
+                    }else{
+                        selectedUnit = null;
                     }
 
+                }else{
+                    selectedUnit = null;// unselect unit after every move/action
+                    
                 }
-                selectedUnit = null;
 
-                drawGame();
             }else{
-                let pass = "passable terrain";
-                if(!isPassableTerrain(gameMap[y][x]))
-                    pass =  "non"+pass;
-                let punit = '';
-                if(unit) punit = printUnit(unit);
-                selectedStatus.innerHTML = JSON.stringify(gameMap[y][x])+ " is "+pass +" "+ punit;
             }
+                drawGame();
         });
 
         function endTurn() {
