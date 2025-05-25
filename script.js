@@ -54,6 +54,7 @@ const showCoords = false;
         const editorCtx = editorCanvas.getContext('2d');
         const selectedStatus = document.getElementById('selected_status');
         const castleMenu = document.getElementById('castle_menu');
+        const menu = document.getElementById('menu');
         const gridSize = 20;
         const cellSize = 40;
         let currentPlayer = 1;
@@ -90,6 +91,12 @@ const showCoords = false;
             goInit();
         }
 
+        function toggleMenu(){
+            if(menu.style.display === 'none')
+                menu.style.display = 'inline-block';
+            else
+                menu.style.display = 'none';
+        }
         function showOverlay(msg){
             const over = document.querySelector("#overlay p");
             over.innerHTML = msg;
