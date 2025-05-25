@@ -1,4 +1,5 @@
 
+const showCoords = false;
         const passableTerrain = [
                 "grass","dirt","road","stoneroad","castle","shipyard","well","goldmine","bridge"        
         ];
@@ -210,6 +211,12 @@
 
                     ctx.strokeStyle = '#00000033';
                     ctx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
+
+                    if(showCoords){
+                        ctx.fillStyle = 'black';
+                        ctx.font = '10px monospace';
+                        ctx.fillText(`${x},${y}`, x * cellSize + 2, y * cellSize + 12);
+                    }
                 }
             }
 
@@ -451,18 +458,19 @@
         }
 
         function attakUnit(selectedUnit, unit){
-            //console.log(selectedUnit, unit);
+            console.log(selectedUnit, unit);
             unit.health -= selectedUnit.attack;
             selectedUnit.movesLeft -= movesPerAttack;
             if (unit.health <= 0) {
-                selectedUnit.x = x;
-                selectedUnit.y = y;
+                //selectedUnit.x = x;
+                //selectedUnit.y = y;
                 selectedUnit.gold += unit.gold;
                 gameUnits = gameUnits.filter(u => u !== unit);
                 checkWin();
             }
 
         }
+        //GAME LOOP
         gameCanvas.addEventListener('click', (e) => {
             castleMenu.style.display = "none";
             if (mode !== 'game') return;
@@ -496,7 +504,7 @@
                 if (unit && unit.player !== currentPlayer ) {
                     if(!unit.gold) unit.gold = 0;
                     // Attack
-                    if( unit.health === 0 && selectedUnit.movesLeft >= movesToDo){
+                    if( unit.type === 'coin' && selectedUnit.movesLeft >= movesToDo && movesToDo <= 1 ){
                         selectedUnit.movesLeft -= movesToDo;
                         selectedUnit.x = x;
                         selectedUnit.y = y;
@@ -525,7 +533,7 @@
 
                     }
                     //console.log('it did attack',selectedUnit, movesToDo, movesPerAttack);
-                } else if (!unit &&  movesToDo <= selectedUnit.move ) {
+                } else if (!unit &&  movesToDo <= 1 /*selectedUnit.move*/ ) {
 
                     // Move if terain allows
                     if(
@@ -557,19 +565,24 @@
             for (let xi = unit.x-move; xi <= unit.x+move; xi++){
                 for (let yi = unit.y-move; yi <= unit.y+move; yi++){
                     let unitAt = getUnitAt(xi,yi);
-                    if(unitAt) return unitAt;
+                    //console.log('unit at ',xi,yi,unitAt);
+                    if(unitAt && unitAt.player !== 0) return unitAt ;
                 }
             }
+
             return null;
         }
         function doAI(){
-            //console.log("AI DOING AI SUFF hERE...");
+            console.log("AI DOING AI SUFF hERE...");
             gameUnits.forEach(unit => {
                 if(unit.player === 0){
                     let x,y;
                     //should maybe check first all locations for possible attack before / if doing random move
-                    let unitAt = checkForUnitsArround(unit);
-                    if(!unitAt){
+                    let unitAt = null;
+                    unitAt = checkForUnitsArround(unit);
+                    //if(unitAt)
+                    if(!unitAt || unitAt.player === 0 || unitAt.type === 'coin'){
+                        console.log('ai did not found unit', );
                         let r = getRandomInt(4);
                         switch(r){
                             case 0: //go up
@@ -594,15 +607,15 @@
                         if (y > gridSize-1) y = gridSize-1;
 
                         //console.log(x,y, gameMap[y][x],'dd');
-                        if(isPassableTerrain(gameMap[y][x])){
+                        if(isPassableTerrain(gameMap[y][x]) && !getUnitAt(x,y)){
                             unit.x = x;
                             unit.y = y;
                         }
                     }else{
-                        //console.log('ai attak unit', unitAt);
+                        console.log(unit.move,'ai attak unit', unitAt);
                         if(unitAt.player !== 0){
                             attakUnit(unit, unitAt);
-                            //console.log('ai did hurt unit', unitAt);
+                            console.log('ai did hurt unit', unitAt);
                         }
                     }
                 }
@@ -617,6 +630,7 @@
             selectedUnit = null;
             // refill moves left for units
             gameUnits.forEach(unit => {
+                    //console.log('looping units', unit);
                 unit.movesLeft = unitsBlueprint[unit.type].movesLeft;
                 if(gameMap[unit.y][unit.x] === "well"){
                     //console.log('you are on the well');
@@ -624,14 +638,14 @@
                     if(unit.health > unitsBlueprint[unit.type].health){ unit.health = unitsBlueprint[unit.type].health; }
                 }
                 if(gameMap[unit.y][unit.x] === "goldmine"){
-                    //console.log('you are on the goldmine');
+                    //console.log('you are on the goldmine',unit);
                     unit.gold += 5;
                     if(unit.type === "goblin"){
                         unit.gold += 20;
                     }
                 }
                 if(gameMap[unit.y][unit.x] === "castle"){
-                    //console.log('you are on the castle and if you have enough money you will gain one more unit');
+                    console.log('you are on the castle and if you have enough money you will gain one more unit');
                     
                 }
             });
