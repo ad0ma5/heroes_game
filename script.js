@@ -56,7 +56,7 @@
         const gridSize = 20;
         const cellSize = 40;
         let currentPlayer = 1;
-        let players = [newPlayer(1),newPlayer(2)];
+        let players = [newPlayer(0), newPlayer(1), newPlayer(2)];
         let currentPlayerObj = players[0];
         let selectedUnit = null;
         let gameMap = createEmptyMap();
@@ -105,7 +105,8 @@
                 unitObj.y = selectedUnit.y;
                 gameUnits.push(unitObj);
                 drawUnits(gameCtx);
-                alert('bought');
+                alert('You have bought '+type);
+                
             }else{
                 alert('come back when you have '+price+'. you have only '+selectedUnit.gold );
             }
@@ -117,9 +118,9 @@
         function newPlayer(id){
             return {
                 id: id,
-                money: 0,
-                exp: 0,
-                level: 1,
+                //money: 0,
+                //exp: 0,
+                //level: 1,
             }
         }
         function goInit(){
@@ -415,7 +416,7 @@
                 if(unit.player === 1) count1++;
                 else count2++;
             });
-            console.log('checking win 1=',count1,'2=',count2);
+            //console.log('checking win 1=',count1,'2=',count2);
             if(count1 ===0){
                 alert("player 2 won!!!");
                 reinit();
@@ -445,10 +446,23 @@
         }
 
         function printCastleMenu(){
-            console.log('menu for unit ',selectedUnit, ' player', currentPlayer);
+            //console.log('menu for unit ',selectedUnit, ' player', currentPlayer);
             castleMenu.style.display = "block";
         }
 
+        function attakUnit(selectedUnit, unit){
+            //console.log(selectedUnit, unit);
+            unit.health -= selectedUnit.attack;
+            selectedUnit.movesLeft -= movesPerAttack;
+            if (unit.health <= 0) {
+                selectedUnit.x = x;
+                selectedUnit.y = y;
+                selectedUnit.gold += unit.gold;
+                gameUnits = gameUnits.filter(u => u !== unit);
+                checkWin();
+            }
+
+        }
         gameCanvas.addEventListener('click', (e) => {
             castleMenu.style.display = "none";
             if (mode !== 'game') return;
@@ -456,7 +470,7 @@
             const x = Math.floor((e.clientX - rect.left) / cellSize);
             const y = Math.floor((e.clientY - rect.top) / cellSize);
             const unit = getUnitAt(x, y);
-            console.log('click over ', x,y, gameMap[y][x], unit)
+            //console.log('click over ', x,y, gameMap[y][x], unit)
                 let pass = "passable terrain";
                 if(!isPassableTerrain(gameMap[y][x]))
                     pass =  "non"+pass;
@@ -478,7 +492,7 @@
                 }
             } else if (selectedUnit) {
                 let movesToDo = Math.abs(selectedUnit.x - x) + Math.abs(selectedUnit.y - y);
-                        console.log('it will move',selectedUnit, movesToDo);
+                //console.log('it will move',selectedUnit, movesToDo);
                 if (unit && unit.player !== currentPlayer ) {
                     if(!unit.gold) unit.gold = 0;
                     // Attack
@@ -488,6 +502,7 @@
                         selectedUnit.y = y;
                         selectedUnit.gold += unit.gold;
                         gameUnits = gameUnits.filter(u => u !== unit);
+                        
                     }
                     else if( 
                         movesPerAttack <= selectedUnit.movesLeft 
@@ -496,18 +511,20 @@
                         && 
                         movesToDo <= selectedUnit.move 
                     ){
+                        attakUnit(selectedUnit, unit);
+                        /*
                         unit.health -= selectedUnit.attack;
                         selectedUnit.movesLeft -= movesPerAttack;
-                        if (unit.health <= 0) {
+                        if (unit.health <= 0) {// coin, maybe something else later who is collectable 
                             selectedUnit.x = x;
                             selectedUnit.y = y;
                             selectedUnit.gold += unit.gold;
                             gameUnits = gameUnits.filter(u => u !== unit);
                             checkWin();
-                        }
+                        }*/
 
                     }
-                    console.log('it did attack',selectedUnit, movesToDo, movesPerAttack);
+                    //console.log('it did attack',selectedUnit, movesToDo, movesPerAttack);
                 } else if (!unit &&  movesToDo <= selectedUnit.move ) {
 
                     // Move if terain allows
@@ -518,7 +535,7 @@
                         selectedUnit.x = x;
                         selectedUnit.y = y;
                         selectedUnit.movesLeft -= movesToDo;
-                        console.log('it moved',selectedUnit);
+                        //console.log('it moved',selectedUnit);
                     }else{
                         selectedUnit = null;
                     }
@@ -532,59 +549,129 @@
             }
                 drawGame();
         });
+        function getRandomInt(max) {
+          return Math.floor(Math.random() * max);
+        }
+        function checkForUnitsArround(unit){
+            let move = unit.move;
+            for (let xi = unit.x-move; xi <= unit.x+move; xi++){
+                for (let yi = unit.y-move; yi <= unit.y+move; yi++){
+                    let unitAt = getUnitAt(xi,yi);
+                    if(unitAt) return unitAt;
+                }
+            }
+            return null;
+        }
+        function doAI(){
+            //console.log("AI DOING AI SUFF hERE...");
+            gameUnits.forEach(unit => {
+                if(unit.player === 0){
+                    let x,y;
+                    //should maybe check first all locations for possible attack before / if doing random move
+                    let unitAt = checkForUnitsArround(unit);
+                    if(!unitAt){
+                        let r = getRandomInt(4);
+                        switch(r){
+                            case 0: //go up
+                                x = unit.x;
+                                y = unit.y -1;
+                                break;
+                            case 1: //go l
+                                x = unit.x -1;
+                                y = unit.y;
+                                break;
+                            case 2: //go down
+                                x = unit.x;
+                                y = unit.y +1;
+                                break;
+                            case 3: //go r
+                                x = unit.x +1;
+                                y = unit.y;
+                        }
+                        if (x < 0) x = 0;
+                        if (x > gridSize-1) x = gridSize-1;
+                        if (y < 0) y = 0;
+                        if (y > gridSize-1) y = gridSize-1;
+
+                        //console.log(x,y, gameMap[y][x],'dd');
+                        if(isPassableTerrain(gameMap[y][x])){
+                            unit.x = x;
+                            unit.y = y;
+                        }
+                    }else{
+                        //console.log('ai attak unit', unitAt);
+                        if(unitAt.player !== 0){
+                            attakUnit(unit, unitAt);
+                            //console.log('ai did hurt unit', unitAt);
+                        }
+                    }
+                }
+            });
+        }
 
         function endTurn() {
-            currentPlayer = currentPlayer === 1 ? 2 : 1;
+            currentPlayer++;
+            currentPlayer = currentPlayer === 3 ? 0 : currentPlayer;
+
             currentPlayerObj = players[currentPlayer-1];
             selectedUnit = null;
             // refill moves left for units
             gameUnits.forEach(unit => {
                 unit.movesLeft = unitsBlueprint[unit.type].movesLeft;
                 if(gameMap[unit.y][unit.x] === "well"){
-                    console.log('you are on the well');
+                    //console.log('you are on the well');
                     unit.health += 10;
                     if(unit.health > unitsBlueprint[unit.type].health){ unit.health = unitsBlueprint[unit.type].health; }
                 }
                 if(gameMap[unit.y][unit.x] === "goldmine"){
-                    console.log('you are on the goldmine');
+                    //console.log('you are on the goldmine');
                     unit.gold += 5;
                     if(unit.type === "goblin"){
                         unit.gold += 20;
                     }
                 }
                 if(gameMap[unit.y][unit.x] === "castle"){
-                    console.log('you are on the castle and if you have enough money you will gain one more unit');
+                    //console.log('you are on the castle and if you have enough money you will gain one more unit');
                     
                 }
             });
+
             if(currentPlayer === 1) turnCount++;
-            document.getElementById('status').textContent = printPlayer(currentPlayerObj);
-            drawGame();
-            showOverlay("Turn for Player "+currentPlayer);
+            
+            if(currentPlayer === 0){ 
+                doAI();
+                drawGame();
+                endTurn();
+            }else{
+                document.getElementById('status').textContent = printPlayer(currentPlayerObj);
+                drawGame();
+                showOverlay("Turn for Player "+currentPlayer);
+            }
         }
         function printPlayer(player){
-            return `Player ${currentPlayer}'s Turn, turnCount=${turnCount} \nMoney:${player.money} exp:${{player}.exp}`;
+            //return `Player ${currentPlayer}'s Turn, turnCount=${turnCount} \nMoney:${player.money} exp:${{player}.exp}`;
+            return `Player ${currentPlayer}'s Turn, turnCount=${turnCount}`;
         }
             
 
         function loadMap() {
-                console.log('load?');
+                //console.log('load?');
             const savedMap = localStorage.getItem('gameMap');
             const savedUnits = localStorage.getItem('gameUnits');
             if (savedMap && savedUnits) {
-                console.log('load saved?');
+                //console.log('load saved?');
                 gameMap = JSON.parse(savedMap);
                 gameUnits = JSON.parse(savedUnits);
                 drawGame();
                 showOverlay("Turn for Player "+currentPlayer);
             }else{
 
-                console.log('preload?');
+                //console.log('preload?');
 
                 fetch("heroes.json")
                   .then(response => response.json())
                   .then(saved => { 
-                        console.log(saved) 
+                        //console.log(saved) 
                         gameMap = saved.map;
                         gameUnits = saved.units;
                         drawGame();
@@ -612,7 +699,7 @@
                 unitObj.y = y;
                 unitObj.player = player;
                 gameUnits.push(unitObj);
-                console.log('editor',unitObj,gameUnits);
+                //console.log('editor',unitObj,gameUnits);
                 /*
                     gameUnits.push({
                         x, y, type: unitType, player,
@@ -655,7 +742,7 @@
             const obj = JSON.parse(text);
             if (obj.map) gameMap = obj.map;
             if (obj.units) gameUnits = obj.units;
-            console.log(obj);
+            //console.log(obj);
             drawEditor();
         }
 ///////////////////////////////////////
