@@ -4,6 +4,8 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>Heroes Strategy Game</title>
+        
+        <meta name="viewport" content="width=device-width, initial-scale=1.0"> 
         <style>
         body,button {
             font-family: fantasy, Arial, sans-serif;
@@ -87,7 +89,7 @@
             top: auto;
         }
         #selected_status:empty {
-          display: none;
+            display: none;
         }
         #mode-controls{
             position:relative;
@@ -128,7 +130,7 @@
             text-align: center;
             padding-top: 25%;
             z-index: 1;
-}
+        }
         }
         </style>
     </head>
@@ -139,21 +141,21 @@
             <button onclick="switchMode('game')">Play Game</button>
             <button onclick="switchMode('editor')">Map Editor</button>
         </div>
-</h1> 
-        
-               <div id="game-container">
+        </h1> 
+
+        <div id="game-container">
             <div id="controls">
                 <button onclick="endTurn()">End Turn</button>
                 <!--
-                <button onclick="loadMap()">Load default Map</button>
+<button onclick="loadMap()">Load default Map</button>
 -->
             </div>
-            
+
             <div id="selected_status" onclick="this.innerHTML = '';"></div>
             <div id="castle_menu">
-                    <button onclick="buy('knight')" >Knight 1000</button>
-                    <button onclick="buy('archer')" >Archer 500</button>
-                    <button onclick="buy('goblin')" >Goblin 700</button>
+                <button onclick="buy('knight')" >Knight 1000</button>
+                <button onclick="buy('archer')" >Archer 500</button>
+                <button onclick="buy('goblin')" >Goblin 700</button>
             </div>
             <canvas id="game-canvas" width="800" height="800"></canvas>
         </div>

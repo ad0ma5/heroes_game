@@ -627,6 +627,7 @@ const showCoords = false;
             currentPlayer = currentPlayer === 3 ? 0 : currentPlayer;
 
             currentPlayerObj = players[currentPlayer-1];
+            autosave();
             selectedUnit = null;
             // refill moves left for units
             gameUnits.forEach(unit => {
@@ -669,6 +670,11 @@ const showCoords = false;
             
 
         function loadMap() {
+            if(loadAutosave()){
+                        drawGame();
+                        showOverlay("Turn for Player "+currentPlayer);
+                return;
+            }
                 //console.log('load?');
             const savedMap = localStorage.getItem('gameMap');
             const savedUnits = localStorage.getItem('gameUnits');
@@ -734,6 +740,25 @@ const showCoords = false;
             localStorage.setItem('gameMap', JSON.stringify(gameMap));
             localStorage.setItem('gameUnits', JSON.stringify(gameUnits));
             alert('Map saved!');
+        }
+
+        function loadAutosave(){
+            if(localStorage.getItem('autosave')){
+                const autosave = JSON.parse(localStorage.getItem('autosave'));
+                gameMap = autosave.map;
+                gameUnits = autosave.units;
+                currentPlayer = autosave.current;
+                return true;
+            }
+            return false;
+        }
+        function autosave(){
+            const toSave = {
+                map: gameMap,
+                units: gameUnits,
+                current: currentPlayer
+            }
+            localStorage.setItem('autosave', JSON.stringify(toSave));
         }
 
         function clearMap() {
