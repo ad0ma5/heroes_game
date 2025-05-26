@@ -145,6 +145,17 @@
             z-index: 1;
             height: 70vh;
         }
+        #map_menu{
+
+            position: absolute;
+          margin: 10%;
+          background: white;
+          padding: 8%;
+          font-size: 242%;
+        }
+        #map_menu:empty{
+            display:none;
+        }
         </style>
     </head>
     <body>
@@ -154,16 +165,19 @@
             <div id="menu" style="display: none;"> 
                 <div id="status" >Player 1, turn 0</div>
                 <div id="mode-controls">
-                <button onclick="switchMode('game')">Play Game</button>
-                <button onclick="switchMode('editor')">Map Editor</button>
+                    <button onclick="switchMode('game')">Play Game</button>
+                    <button onclick="switchMode('editor')">Map Editor</button>
+                    <button onclick="defaultLoad()">load autosave</button>
+                    <button onclick="loadMap()">Load map</button>
+                </div>
             </div>
         </h1> 
+        <div id="map_menu"></div>
 
         <div id="game-container">
             <div id="controls">
                 <button onclick="endTurn()">End Turn</button>
                 <!--
-<button onclick="loadMap()">Load default Map</button>
 -->
             </div>
 
@@ -178,6 +192,7 @@
         <div id="editor-container">
             <canvas id="editor-canvas" width="800" height="800"></canvas>
             <div id="editor-controls">
+                <input type="text" id="map_name" name="map_name" placeholder="Map name" />
                 <select id="terrain-type">
                     <option value="dirt">Dirt</option>
                     <option value="grass">Grass</option>

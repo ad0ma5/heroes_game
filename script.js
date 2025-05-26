@@ -54,6 +54,8 @@ const showCoords = false;
         const editorCtx = editorCanvas.getContext('2d');
         const selectedStatus = document.getElementById('selected_status');
         const castleMenu = document.getElementById('castle_menu');
+        const input_map_name = document.querySelector('#map_name');
+        const map_menu = document.querySelector('#map_menu');
         const menu = document.getElementById('menu');
         const gridSize = 20;
         const cellSize = 40;
@@ -63,6 +65,7 @@ const showCoords = false;
         let selectedUnit = null;
         let gameMap = createEmptyMap();
         let gameUnits = [];
+        let mapList = [];
         let mode = 'game';
         let turnCount = 0;
 
@@ -135,7 +138,8 @@ const showCoords = false;
             if(dirtSpriteLoaded && unitSpriteLoaded){
                 // Initialize
                 switchMode('game');
-                loadMap();
+                defaultLoad();
+            //    loadMap();
             }
         }
         function createEmptyMap() {
@@ -688,26 +692,55 @@ const showCoords = false;
             return `Player ${currentPlayer}'s Turn, turnCount=${turnCount}`;
         }
             
-
-        function loadMap() {
+        function defaultLoad(){
             if(loadAutosave()){
                         drawGame();
                         showOverlay("Turn for Player "+currentPlayer);
                 return;
             }
-                //console.log('load?');
-            const savedMap = localStorage.getItem('gameMap');
-            const savedUnits = localStorage.getItem('gameUnits');
-            if (savedMap && savedUnits) {
-                //console.log('load saved?');
-                gameMap = JSON.parse(savedMap);
-                gameUnits = JSON.parse(savedUnits);
+            alert('autosave not found, please load a map');
+            loadMap();
+        }
+        
+        function printSavedMap(maps){
+            let list = '';
+            for(let i = 0; i<maps.length; i++){
+                list += `<div onclick="loadMapByName('${maps[i]}')">${maps[i]} del downl</div>`;
+            }
+            map_menu.innerHTML = list;
+        }
+
+        function loadMapByName(name){
+            const loadMapStr = localStorage.getItem(name);
+            if(loadMapStr){
+                const loadMapObj = JSON.parse(loadMapStr);
+                gameMap = loadMapObj.map;
+                gameUnits = loadMapObj.units;
+                currentPlayer = 1;
+                alert(`loaded ${name}`)
+                map_menu.innerHTML = "";
                 drawGame();
                 showOverlay("Turn for Player "+currentPlayer);
             }else{
 
+                alert(`not found ${name}`)
+            }
+
+        }
+        function loadMap() {
+            //alert('will load maps');
+            const savedMapsStr = localStorage.getItem('savedMaps');
+            let savedMaps;
+            if(savedMapsStr){
+                savedMaps = JSON.parse(savedMapsStr);
+                printSavedMap(savedMaps);
+                return;
+            }
+                //console.log('load?');
+
                 //console.log('preload?');
 
+            //if no maps at all just get one from there
                 fetch("heroes.json")
                   .then(response => response.json())
                   .then(saved => { 
@@ -717,7 +750,6 @@ const showCoords = false;
                         drawGame();
                         showOverlay("Turn for Player "+currentPlayer);
                    });
-            }
         }
 
 
@@ -757,9 +789,35 @@ const showCoords = false;
         });
 
         function saveMap() {
+
+            if(input_map_name.value === ""){
+                alert('fill in the name for the map to save it');
+                return;
+            }
+            console.log(input_map_name.value, 'name of save');
+            const toSave = {
+                map: gameMap,
+                units: gameUnits,
+                current: currentPlayer
+            }
+            localStorage.setItem(input_map_name.value, JSON.stringify(toSave));
+            const savedMapsStr = localStorage.getItem('savedMaps');
+            let savedMaps = [];
+            if(savedMapsStr) savedMaps = JSON.parse(savedMapsStr);
+            savedMaps.push(input_map_name.value)
+            localStorage.setItem('savedMaps', JSON.stringify(savedMaps));
+            alert('Map "'+input_map_name.value+'" saved! ');
+            return;
             localStorage.setItem('gameMap', JSON.stringify(gameMap));
             localStorage.setItem('gameUnits', JSON.stringify(gameUnits));
-            alert('Map saved!');
+            alert('Map saved! 1111');
+        }
+
+        function loadSavedMaps(){
+            let savedMaps = localStorage.getItem('savedMaps');
+            if(savedMaps) mapList = JSON.parse(savedMaps);
+            map_menu.innerHTML = savedMaps;
+        
         }
 
         function loadAutosave(){
