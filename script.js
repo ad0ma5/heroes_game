@@ -221,8 +221,8 @@ function drawTerrain(ctx){
         for (let x = 0; x < gridSize; x++) {
             const tile = gameMap[y][x];
             const sprite = DIRT_SPRITE_MAP[tile];
-            const sx = sprite[1] * SPRITE_WIDTH +1;
-            const sy = sprite[0] * SPRITE_HEIGHT +1;
+            const sx = sprite[1] * SPRITE_WIDTH ;
+            const sy = sprite[0] * SPRITE_HEIGHT ;
 
             ctx.drawImage(
                 dirtSpriteNew,
