@@ -540,6 +540,7 @@ gameCanvas.addEventListener('click', (e) => {
         }
     } else if (selectedUnit) {
         let movesToDo = Math.abs(selectedUnit.x - x) + Math.abs(selectedUnit.y - y);
+        let movesToDeduct = movesToDo;
         let currentTile = gameMap[selectedUnit.y][selectedUnit.x];
         let nextTile = gameMap[y][x];
 
@@ -549,7 +550,7 @@ gameCanvas.addEventListener('click', (e) => {
                 ["road","stoneroad"].indexOf(nextTile) !== -1 
         ){
             console.log('half move');
-            movesToDo -= movesToDo/2;
+            movesToDeduct -= movesToDeduct/2;
         }else{
         }
 
@@ -588,20 +589,21 @@ gameCanvas.addEventListener('click', (e) => {
             //console.log('it did attack',selectedUnit, movesToDo, movesPerAttack);
         } else if (!unit &&  0.5 <= movesToDo && movesToDo <= 1  /*selectedUnit.move*/ ) {
 
-            console.log('here we move?');
+            console.log('here we move? else', movesToDo, movesToDeduct);
             // Move if terain allows
             if(
-                isPassableTerrain(gameMap[y][x]) && movesToDo <= selectedUnit.movesLeft
+                isPassableTerrain(gameMap[y][x]) && movesToDeduct <= selectedUnit.movesLeft
             ){
                 selectedUnit.x = x;
                 selectedUnit.y = y;
-                selectedUnit.movesLeft -= movesToDo;
+                selectedUnit.movesLeft -= movesToDeduct;
                 //console.log('it moved',selectedUnit);
             }else{
                 selectedUnit = null;
             }
 
         }else{
+            console.log('here we no move?', movesToDo, movesToDeduct);
             selectedUnit = null;// unselect unit after every move/action
 
         }
