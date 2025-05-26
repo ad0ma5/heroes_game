@@ -373,43 +373,46 @@ const showCoords = false;
 
                 //if(unit.health > 0){
                 if(unit.type !== 'coin'){
-                gameCtx.fillStyle = 'black';
-                gameCtx.fillRect(px + 2, py , barWidth, barHeight+1);
-                gameCtx.fillStyle = hpRatio > 0.5 ? 'lightgreen' : hpRatio > 0.25 ? 'orange' : 'red';
-                gameCtx.fillRect(px + 2, py, barWidth * hpRatio, barHeight);
+                    gameCtx.fillStyle = 'black';
+                    gameCtx.fillRect(px + 2, py , barWidth, barHeight+1);
+                    gameCtx.fillStyle = hpRatio > 0.5 ? 'lightgreen' : hpRatio > 0.25 ? 'orange' : 'red';
+                    gameCtx.fillRect(px + 2, py, barWidth * hpRatio, barHeight);
                 }
                 // Draw move bar
                 if(unit.type !== 'coin'){
-                gameCtx.fillStyle = 'black';
-                gameCtx.fillRect(px + 2, py + cellSize - barHeight-2, barWidth, barHeight+1);
-                gameCtx.fillStyle = mvRatio > 0.5 ? 'yellow' : mvRatio > 0.25 ? 'orange' : 'red';
-                gameCtx.fillRect(px + 2, py + cellSize - barHeight-2, barWidth * mvRatio, barHeight);
+                    gameCtx.fillStyle = 'black';
+                    gameCtx.fillRect(px + 2, py + cellSize - barHeight-2, barWidth, barHeight+1);
+                    gameCtx.fillStyle = mvRatio > 0.5 ? 'yellow' : mvRatio > 0.25 ? 'orange' : 'red';
+                    gameCtx.fillRect(px + 2, py + cellSize - barHeight-2, barWidth * mvRatio, barHeight);
                 }
                 //console.log('unit', unit, currentPlayer);
                 if(currentPlayer === unit.player){
                     if(unit.movesLeft === 0 ) 
                         ctx.strokeStyle = 'red';
                     else if (unit.player === 1)
-                        ctx.strokeStyle = 'lightblue';
+                        ctx.strokeStyle = 'blue';
                     else
-                        ctx.strokeStyle = 'lightgreen';
+                        ctx.strokeStyle = 'magenta';
 
                 }else{
 
                     if (unit.player === 1)
-                        ctx.strokeStyle = 'blue';
+                        ctx.strokeStyle = 'lightblue';
                     else if (unit.player === 2)
-                        ctx.strokeStyle = 'green';
+                        ctx.strokeStyle = 'pink';
                 }
                 if(unit.type !== 'coin'){
-                    ctx.lineWidth = 2;
+                    if(unit.player === 0)
+                        ctx.lineWidth = 1;
+                    else
+                        ctx.lineWidth = 2;
                     ctx.strokeRect( (unit.x * cellSize)-2, (unit.y * cellSize)-2, cellSize+2, cellSize+2);
                     ctx.strokeStyle = 'black';
                 }
             });
             if (selectedUnit) {
-                ctx.strokeStyle = 'gold';
-                ctx.lineWidth = 1;
+                ctx.strokeStyle = 'white';
+                ctx.lineWidth = 2;
                 ctx.strokeRect( (selectedUnit.x * cellSize), (selectedUnit.y * cellSize)-2, cellSize+2, cellSize+2);
                 ctx.strokeStyle = 'black';
                 
@@ -418,11 +421,11 @@ const showCoords = false;
         }
         function printUnit(unit){
            return `<ul>
-                <li>type=${unit.type} </li>
-                <li>movesLeft=${unit.movesLeft} </li>
-                <li>health= ${unit.health} </li>
-                <li>attack=${unit.attack}</li>
-                <li>player=${unit.player}</li>
+                <li>t: ${unit.type} </li>
+                <li>movesLeft: ${unit.movesLeft} </li>
+                <li>hlf: ${unit.health} </li>
+                <li>atk:${unit.attack}</li>
+                <li>p:${unit.player}</li>
                 <li>gold=${unit.gold}</li>
             </ul>`;
         }
@@ -526,6 +529,19 @@ const showCoords = false;
                 }
             } else if (selectedUnit) {
                 let movesToDo = Math.abs(selectedUnit.x - x) + Math.abs(selectedUnit.y - y);
+                let currentTile = gameMap[selectedUnit.y][selectedUnit.x];
+                let nextTile = gameMap[y][x];
+
+                console.log('half move? ',currentTile,nextTile);
+                if(
+                    ["road","stoneroad"].indexOf(currentTile) !== -1 &&
+                    ["road","stoneroad"].indexOf(nextTile) !== -1 
+                ){
+                    console.log('half move');
+                    movesToDo -= movesToDo/2;
+                }else{
+                }
+
                 //console.log('it will move',selectedUnit, movesToDo);
                 if (unit && unit.player !== currentPlayer ) {
                     if(!unit.gold) unit.gold = 0;
@@ -559,13 +575,12 @@ const showCoords = false;
 
                     }
                     //console.log('it did attack',selectedUnit, movesToDo, movesPerAttack);
-                } else if (!unit &&  movesToDo <= 1 /*selectedUnit.move*/ ) {
+                } else if (!unit &&  0.5 <= movesToDo <= 1  /*selectedUnit.move*/ ) {
 
                     // Move if terain allows
                     if(
                         isPassableTerrain(gameMap[y][x]) && movesToDo <= selectedUnit.movesLeft
                     ){
-
                         selectedUnit.x = x;
                         selectedUnit.y = y;
                         selectedUnit.movesLeft -= movesToDo;
@@ -601,7 +616,7 @@ const showCoords = false;
         function doAI(){
             console.log("AI DOING AI SUFF hERE...");
             gameUnits.forEach(unit => {
-                if(unit.player === 0){
+                if(unit.player === 0 && unit.type !== 'coin'){
                     let x,y;
                     //should maybe check first all locations for possible attack before / if doing random move
                     let unitAt = null;
