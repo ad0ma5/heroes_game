@@ -711,6 +711,20 @@ const showCoords = false;
         }
 
         function loadMapByName(name){
+            if(["heroes","heroes6"].indexOf(name) !== -1){
+                fetch(name+".json")
+                  .then(response => response.json())
+                  .then(saved => { 
+                        //console.log(saved) 
+                        gameMap = saved.map;
+                        gameUnits = saved.units;
+                        currentPlayer = 1;
+                        map_menu.innerHTML = "";
+                        drawGame();
+                        showOverlay("Turn for Player "+currentPlayer);
+                   });
+                return;
+            }
             const loadMapStr = localStorage.getItem(name);
             if(loadMapStr){
                 const loadMapObj = JSON.parse(loadMapStr);
@@ -730,12 +744,19 @@ const showCoords = false;
         function loadMap() {
             //alert('will load maps');
             const savedMapsStr = localStorage.getItem('savedMaps');
-            let savedMaps;
+            let savedMaps = [];
             if(savedMapsStr){
                 savedMaps = JSON.parse(savedMapsStr);
-                printSavedMap(savedMaps);
-                return;
+                //return;
             }
+            if(savedMaps.indexOf("heroes") === -1){
+                savedMaps.push("heroes");
+            }
+            if(savedMaps.indexOf("heroes6") === -1){
+                savedMaps.push("heroes6");
+            }
+            printSavedMap(savedMaps);
+            return
                 //console.log('load?');
 
                 //console.log('preload?');
@@ -805,6 +826,7 @@ const showCoords = false;
             let savedMaps = [];
             if(savedMapsStr) savedMaps = JSON.parse(savedMapsStr);
             savedMaps.push(input_map_name.value)
+            
             localStorage.setItem('savedMaps', JSON.stringify(savedMaps));
             alert('Map "'+input_map_name.value+'" saved! ');
             return;
@@ -816,7 +838,10 @@ const showCoords = false;
         function loadSavedMaps(){
             let savedMaps = localStorage.getItem('savedMaps');
             if(savedMaps) mapList = JSON.parse(savedMaps);
-            map_menu.innerHTML = savedMaps;
+            mapList.push("heroes");
+            mapList.push("heroes6");
+            
+            //map_menu.innerHTML = savedMaps;
         
         }
 
