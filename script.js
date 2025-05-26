@@ -137,6 +137,7 @@ const showCoords = false;
         }
         function goInit(){
             if(dirtSpriteLoaded && unitSpriteLoaded){
+                console.log('goInit');
                 // Initialize
                 switchMode('game');
                 defaultLoad();
@@ -681,8 +682,8 @@ const showCoords = false;
             
             if(currentPlayer === 0){ 
                 doAI();
-                //drawGame();
                 endTurn();
+                drawGame();
             }else{
                 document.getElementById('status').textContent = printPlayer(currentPlayerObj);
                 drawGame();
