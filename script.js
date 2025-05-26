@@ -3,7 +3,7 @@ const showCoords = false;
 const passableTerrain = [
     "grass","dirt","road","stoneroad","castle","shipyard","well","goldmine","bridge"        
 ];
-const defaultMaps = ["heroes","heroes1","heroes6"];
+const defaultMaps = ["heroes","heroes1","heroes2", "heroes6"];
 const terrainDescriptions = {
     road: "move 2x",
     stoneroad: "move 2x",
