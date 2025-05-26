@@ -20,6 +20,9 @@
             background-blend-mode: multiply;
             background-color: teal;
         }
+        #game-container{
+            height: 90vh;
+        }
         #game-container, #editor-container {
             display: none;
         }
@@ -29,7 +32,8 @@
             overflow: auto;
         }
         #editor-container, #editor-container.active {
-            padding-top: 93px
+            padding-top: 93px;
+            height: 86vh;
         }
         canvas {
             border: 0px solid #333;
@@ -51,8 +55,10 @@
             background: black;
         }
         #controls button{
-            font-size:30px;
-            padding:0px;
+            font-size: 30px;
+            padding-top: 16px;
+            line-height: 18px;
+            margin: 0;
         }
         button {
             margin: 0px;
@@ -78,13 +84,13 @@
             background: rgba(255, 255, 255, 0.7);
             background: rgba(0, 255, 0, 0.7);
             font-weight: 700;
-            font-size: 20px;
+            font-size: 18px;
         }
         #status{
             display: inline;
             position:relative;
             right:1%;
-            width: 126px;
+            width: 145px;
             top: 50px;
             background: rgba(255, 255, 255, 0.5);
             background: rgba(0, 255, 0, 0.7);
@@ -103,6 +109,7 @@
         }
         li{
             list-style-type: none;
+            display: inline-block;
         }
         ul{
             padding:0;
@@ -115,6 +122,8 @@
             display: inline-block;
             background: green;
             padding: 2px;
+            padding-top: 15px;
+            line-height: 30px;
         }
         #castle_menu{
             display: none;
@@ -134,7 +143,7 @@
             text-align: center;
             padding-top: 25%;
             z-index: 1;
-        }
+            height: 70vh;
         }
         </style>
     </head>

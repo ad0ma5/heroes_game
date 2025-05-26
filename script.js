@@ -345,12 +345,6 @@ const showCoords = false;
         }
         function drawUnits(ctx){
             //check if currently drawing selected unit
-            if (selectedUnit) {
-                ctx.strokeStyle = 'white';
-                ctx.lineWidth = 3;
-                ctx.strokeRect(selectedUnit.x * cellSize, selectedUnit.y * cellSize, cellSize, cellSize);
-                ctx.strokeStyle = 'black';
-            }
             gameUnits.forEach(unit => {
                 const spriteRow = SPRITE_MAP[unit.type][unit.player];
                 const spriteCol = 0; // You can animate later by incrementing this
@@ -371,30 +365,49 @@ const showCoords = false;
                 const hpRatio = unit.health / unitsBlueprint[unit.type].health;
                 const mvRatio = unit.movesLeft / unitsBlueprint[unit.type].movesLeft;
 
-                if(unit.health > 0){
+                //if(unit.health > 0){
+                if(unit.type !== 'coin'){
                 gameCtx.fillStyle = 'black';
-                gameCtx.fillRect(px + 2, py , barWidth, barHeight);
+                gameCtx.fillRect(px + 2, py , barWidth, barHeight+1);
                 gameCtx.fillStyle = hpRatio > 0.5 ? 'lightgreen' : hpRatio > 0.25 ? 'orange' : 'red';
                 gameCtx.fillRect(px + 2, py, barWidth * hpRatio, barHeight);
                 }
                 // Draw move bar
-                if(unit.movesLeft > 0){
+                if(unit.type !== 'coin'){
                 gameCtx.fillStyle = 'black';
-                gameCtx.fillRect(px + 2, py + cellSize - barHeight, barWidth, barHeight);
-                gameCtx.fillStyle = mvRatio > 0.5 ? 'yellow' : mvRatio > 0.25 ? 'blue' : 'grey';
-                gameCtx.fillRect(px + 2, py + cellSize - barHeight, barWidth * mvRatio, barHeight);
+                gameCtx.fillRect(px + 2, py + cellSize - barHeight-2, barWidth, barHeight+1);
+                gameCtx.fillStyle = mvRatio > 0.5 ? 'yellow' : mvRatio > 0.25 ? 'orange' : 'red';
+                gameCtx.fillRect(px + 2, py + cellSize - barHeight-2, barWidth * mvRatio, barHeight);
                 }
                 //console.log('unit', unit, currentPlayer);
                 if(currentPlayer === unit.player){
                     if(unit.movesLeft === 0 ) 
                         ctx.strokeStyle = 'red';
+                    else if (unit.player === 1)
+                        ctx.strokeStyle = 'lightblue';
                     else
-                        ctx.strokeStyle = 'orange';
+                        ctx.strokeStyle = 'lightgreen';
+
+                }else{
+
+                    if (unit.player === 1)
+                        ctx.strokeStyle = 'blue';
+                    else if (unit.player === 2)
+                        ctx.strokeStyle = 'green';
+                }
+                if(unit.type !== 'coin'){
                     ctx.lineWidth = 2;
                     ctx.strokeRect( (unit.x * cellSize)-2, (unit.y * cellSize)-2, cellSize+2, cellSize+2);
                     ctx.strokeStyle = 'black';
                 }
             });
+            if (selectedUnit) {
+                ctx.strokeStyle = 'gold';
+                ctx.lineWidth = 1;
+                ctx.strokeRect( (selectedUnit.x * cellSize), (selectedUnit.y * cellSize)-2, cellSize+2, cellSize+2);
+                ctx.strokeStyle = 'black';
+                
+            }
 
         }
         function printUnit(unit){
