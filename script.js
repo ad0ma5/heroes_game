@@ -68,6 +68,7 @@ const showCoords = false;
         let mapList = [];
         let mode = 'game';
         let turnCount = 0;
+        let currentMapName = '';
 
         let dirtSpriteLoaded = false;
         let unitSpriteLoaded = false;
@@ -649,9 +650,11 @@ const showCoords = false;
         function endTurn() {
             currentPlayer++;
             currentPlayer = currentPlayer === 3 ? 0 : currentPlayer;
-
             currentPlayerObj = players[currentPlayer-1];
+            if(currentPlayer === 1) turnCount++;
+
             autosave();
+
             selectedUnit = null;
             // refill moves left for units
             gameUnits.forEach(unit => {
@@ -675,11 +678,10 @@ const showCoords = false;
                 }
             });
 
-            if(currentPlayer === 1) turnCount++;
             
             if(currentPlayer === 0){ 
                 doAI();
-                drawGame();
+                //drawGame();
                 endTurn();
             }else{
                 document.getElementById('status').textContent = printPlayer(currentPlayerObj);
@@ -689,13 +691,14 @@ const showCoords = false;
         }
         function printPlayer(player){
             //return `Player ${currentPlayer}'s Turn, turnCount=${turnCount} \nMoney:${player.money} exp:${{player}.exp}`;
-            return `Player ${currentPlayer}'s Turn, turnCount=${turnCount}`;
+            return `Player ${currentPlayer}' turn:${turnCount} map:${currentMapName}`;
         }
             
         function defaultLoad(){
             if(loadAutosave()){
-                        drawGame();
-                        showOverlay("Turn for Player "+currentPlayer);
+                drawGame();
+                showOverlay("Turn for Player "+currentPlayer);
+                document.getElementById('status').textContent = printPlayer(currentPlayerObj);
                 return;
             }
             alert('autosave not found, please load a map');
@@ -711,6 +714,7 @@ const showCoords = false;
         }
 
         function loadMapByName(name){
+            currentMapName = name;
             if(["heroes","heroes6"].indexOf(name) !== -1){
                 fetch(name+".json")
                   .then(response => response.json())
@@ -720,6 +724,8 @@ const showCoords = false;
                         gameUnits = saved.units;
                         currentPlayer = 1;
                         map_menu.innerHTML = "";
+                        turnCount = 0;
+                        document.getElementById('status').textContent = printPlayer(currentPlayerObj);
                         drawGame();
                         showOverlay("Turn for Player "+currentPlayer);
                    });
@@ -731,6 +737,9 @@ const showCoords = false;
                 gameMap = loadMapObj.map;
                 gameUnits = loadMapObj.units;
                 currentPlayer = 1;
+                currentPlayerObj = players[1];
+                turnCount = 0;
+                document.getElementById('status').textContent = printPlayer(currentPlayerObj);
                 alert(`loaded ${name}`)
                 map_menu.innerHTML = "";
                 drawGame();
@@ -835,6 +844,7 @@ const showCoords = false;
             alert('Map saved! 1111');
         }
 
+/*
         function loadSavedMaps(){
             let savedMaps = localStorage.getItem('savedMaps');
             if(savedMaps) mapList = JSON.parse(savedMaps);
@@ -844,13 +854,16 @@ const showCoords = false;
             //map_menu.innerHTML = savedMaps;
         
         }
-
+*/
         function loadAutosave(){
             if(localStorage.getItem('autosave')){
                 const autosave = JSON.parse(localStorage.getItem('autosave'));
                 gameMap = autosave.map;
                 gameUnits = autosave.units;
                 currentPlayer = autosave.current;
+                currentPlayerObj = players[currentPlayerObj];
+                currentMapName = autosave.currentMapName;
+                turnCount = autosave.turnCount || 0;
                 return true;
             }
             return false;
@@ -859,7 +872,9 @@ const showCoords = false;
             const toSave = {
                 map: gameMap,
                 units: gameUnits,
-                current: currentPlayer
+                current: currentPlayer,
+                currentMapName: currentMapName,
+                turnCount: turnCount
             }
             localStorage.setItem('autosave', JSON.stringify(toSave));
         }
@@ -867,6 +882,7 @@ const showCoords = false;
         function clearMap() {
             gameMap = createEmptyMap();
             gameUnits = [];
+            map_name.value = '';
             drawEditor();
         }
 
