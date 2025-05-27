@@ -1,7 +1,7 @@
 
 const showCoords = false;
 const passableTerrain = [
-    "grass","dirt","road","stoneroad","castle","shipyard","well","goldmine","bridge"        
+    "grass","dirt","road","stoneroad","desert","castle","tavern","well","goldmine","bridge"        
 ];
 const defaultMaps = ["heroes","heroes1","heroes2", "heroes6"];
 const terrainDescriptions = {
@@ -166,6 +166,7 @@ function switchMode(newMode) {
         drawGame();
         showOverlay("Turn for Player "+currentPlayer);
     } else {
+        map_name.value = currentMapName;
         drawEditor();
     }
 }
@@ -201,6 +202,7 @@ const DIRT_SPRITE_MAP = {
     grass: [0,1],
     road: [0,2],
     stoneroad: [0,3],
+    desert: [0,4],
 
     lava: [1,0],
     ice: [1,1],
@@ -211,11 +213,11 @@ const DIRT_SPRITE_MAP = {
     castle: [2,0],
     well: [2,1],
     goldmine: [2,2],
-    shipyard: [2,3],
+    tavern: [2,3],
     bridge: [2,4]
 };
 
-function drawTerrain(ctx){
+function drawGrid(ctx){
     // Draw terrain
     for (let y = 0; y < gridSize; y++) {
         for (let x = 0; x < gridSize; x++) {
@@ -244,120 +246,6 @@ function drawTerrain(ctx){
 
 }
 
-function drawGrid(ctx){
-
-    drawTerrain(ctx); return;
-
-    //console.log('drawGrid', gameMap);
-    for (let y = 0; y < gridSize; y++) {
-        for (let x = 0; x < gridSize; x++) {
-            ctx.fillStyle = gameMap[y][x] === 'grass' ? '#90EE90' : gameMap[y][x] === 'forest' ? '#228B22' : '#808080';
-            ctx.fillRect(x * cellSize, y * cellSize, cellSize, cellSize);
-            ctx.strokeRect(x * cellSize, y * cellSize, cellSize, cellSize);
-
-
-            if(gameMap[y][x] === 'dirt')
-                ctx.drawImage(
-                    dirtSprite,
-                    5, 5, DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT,
-                    x * cellSize, y* cellSize,
-                    DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT
-                );
-                else if(gameMap[y][x] === 'forest')
-                    ctx.drawImage(
-                        dirtSprite,
-                        490, 5, DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT,
-                        x * cellSize, y* cellSize,
-                        DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT
-                    );
-                    else if(gameMap[y][x] === 'mountain')
-                        ctx.drawImage(
-                            dirtSprite,
-                            300, 595, DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT,
-                            x * cellSize, y* cellSize,
-                            DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT
-                        );
-                        else if(gameMap[y][x] === 'water')
-                            ctx.drawImage(
-                                dirtSprite,
-                                500, 100, DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT,
-                                x * cellSize, y* cellSize,
-                                DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT
-                            );
-                            else if(gameMap[y][x] === 'grass')
-                                ctx.drawImage(
-                                    dirtSprite,
-                                    825, 5, DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT,
-                                    x * cellSize, y* cellSize,
-                                    DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT
-                                );
-                                else if(gameMap[y][x] === 'road')
-                                    ctx.drawImage(
-                                        dirtSprite,
-                                        20, 585, DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT,
-                                        x * cellSize, y* cellSize,
-                                        DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT
-                                    );
-                                    else if(gameMap[y][x] === 'stoneroad')
-                                        ctx.drawImage(
-                                            dirtSprite,
-                                            100, 485, DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT,
-                                            x * cellSize, y* cellSize,
-                                            DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT
-                                        );
-                                        else if(gameMap[y][x] === 'castle')
-                                            ctx.drawImage(
-                                                dirtSprite,
-                                                5, 780, DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT,
-                                                x * cellSize, y* cellSize,
-                                                DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT
-                                            );
-                                            else if(gameMap[y][x] === 'well')
-                                                ctx.drawImage(
-                                                    dirtSprite,
-                                                    5, 830, DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT,
-                                                    x * cellSize, y* cellSize,
-                                                    DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT
-                                                );
-                                                else if(gameMap[y][x] === 'goldmine')
-                                                    ctx.drawImage(
-                                                        dirtSprite,
-                                                        50, 777, DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT,
-                                                        x * cellSize, y* cellSize,
-                                                        DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT
-                                                    );
-                                                    else if(gameMap[y][x] === 'shipyard')
-                                                        ctx.drawImage(
-                                                            dirtSprite,
-                                                            50, 825, DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT,
-                                                            x * cellSize, y* cellSize,
-                                                            DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT
-                                                        );
-                                                        else if(gameMap[y][x] === 'lava')
-                                                            ctx.drawImage(
-                                                                dirtSprite,
-                                                                685, 300, DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT,
-                                                                x * cellSize, y* cellSize,
-                                                                DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT
-                                                            );
-                                                            else if(gameMap[y][x] === 'ice')
-                                                                ctx.drawImage(
-                                                                    dirtSprite,
-                                                                    685, 200, DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT,
-                                                                    x * cellSize, y* cellSize,
-                                                                    DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT
-                                                                );
-                                                                else if(gameMap[y][x] === 'bridge')
-                                                                    ctx.drawImage(
-                                                                        dirtSprite,
-                                                                        5, 870, DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT,
-                                                                        x * cellSize, y* cellSize,
-                                                                        DIRT_SPRITE_WIDTH, DIRT_SPRITE_HEIGHT
-                                                                    );
-
-        }
-    }
-}
 function drawUnits(ctx){
     //check if currently drawing selected unit
     gameUnits.forEach(unit => {
@@ -400,7 +288,7 @@ function drawUnits(ctx){
             if(unit.player === 0)
                 ctx.lineWidth = 1;
             else
-                ctx.lineWidth = 1;
+                ctx.lineWidth = 2;
             ctx.strokeRect( (unit.x * cellSize), (unit.y * cellSize), cellSize-2, cellSize-2);
             ctx.strokeStyle = 'black';
         }
@@ -408,21 +296,24 @@ function drawUnits(ctx){
         //if(unit.health > 0){
         if(unit.type !== 'coin'){
             gameCtx.fillStyle = 'black';
-            gameCtx.fillRect(px + 2, py , barWidth, barHeight+1);
+            gameCtx.fillRect(px + 2, py+2 , barWidth, barHeight+1);
             gameCtx.fillStyle = hpRatio > 0.5 ? 'lightgreen' : hpRatio > 0.25 ? 'orange' : 'red';
-            gameCtx.fillRect(px + 2, py, barWidth * hpRatio, barHeight);
+            gameCtx.fillRect(px + 2, py+2, barWidth * hpRatio, barHeight);
         }
         // Draw move bar
         if(unit.type !== 'coin'){
             gameCtx.fillStyle = 'black';
-            gameCtx.fillRect(px + 2, py + cellSize - barHeight-2, barWidth, barHeight+1);
-            gameCtx.fillStyle = mvRatio > 0.5 ? 'yellow' : mvRatio > 0.25 ? 'orange' : 'red';
-            gameCtx.fillRect(px + 2, py + cellSize - barHeight-2, barWidth * mvRatio, barHeight);
+            gameCtx.fillRect(px + 2, py + cellSize - barHeight-4, barWidth, barHeight+1);
+            gameCtx.fillStyle = mvRatio > 1 ? 'pink' : mvRatio > 0.5 ? 'yellow' : mvRatio > 0.25 ? 'orange' : 'red';
+            if(mvRatio > 1) 
+                gameCtx.fillRect(px + 2, py + cellSize - barHeight-4, barWidth * 1, barHeight);
+            else
+                gameCtx.fillRect(px + 2, py + cellSize - barHeight-4, barWidth * mvRatio, barHeight);
         }
     });
     if (selectedUnit) {
         ctx.strokeStyle = 'white';
-        ctx.lineWidth = 1;
+        ctx.lineWidth = 2;
         ctx.strokeRect( (selectedUnit.x * cellSize), (selectedUnit.y * cellSize), cellSize-2, cellSize-2);
         ctx.strokeStyle = 'black';
 
@@ -689,8 +580,14 @@ function endTurn() {
     selectedUnit = null;
     // refill moves left for units
     gameUnits.forEach(unit => {
-        //console.log('looping units', unit);
         unit.movesLeft = unitsBlueprint[unit.type].movesLeft;
+        //console.log('looping units', unit);
+        if(gameMap[unit.y][unit.x] === "tavern"){
+            //console.log('you are on the well');
+            unit.movesLeft += unitsBlueprint[unit.type].movesLeft/2;
+
+            if(unit.movesLeft > unitsBlueprint[unit.type].movesLeft * 2){ unit.movesLeft = unitsBlueprint[unit.type].movesLeft * 2; }
+        }
         if(gameMap[unit.y][unit.x] === "well"){
             //console.log('you are on the well');
             unit.health += 10;
@@ -783,7 +680,7 @@ function loadMapByName(name){
         currentPlayerObj = players[1];
         turnCount = 0;
         document.getElementById('status').textContent = printPlayer(currentPlayerObj);
-        alert(`loaded ${name}`)
+        //alert(`loaded ${name}`)
         map_menu.innerHTML = "";
         drawGame();
         showOverlay("Turn for Player "+currentPlayer);
