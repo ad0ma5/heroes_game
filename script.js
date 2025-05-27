@@ -736,7 +736,7 @@ function defaultLoad(){
 }
 
 function printSavedMap(maps){
-    let list = '';
+    let list = `<p onclick="this.parentNode.innerHTML = ''">close</p><p class="d" onclick="this.parentNode.innerHTML=''">&times;</p><br />`;
     for(let i = 0; i<maps.length; i++){
         list += `<p onclick="loadMapByName('${maps[i]}')">${maps[i]} </p><p class="d" onclick="deleteMap('${maps[i]}')">del</p><br />`;
     }
@@ -802,6 +802,7 @@ function loadMap() {
     }
     for(let i = 0; i< defaultMaps.length;i++){
         if(savedMaps.indexOf(defaultMaps[i]) === -1){
+            console.log('pushing',defaultMaps[i]);
             savedMaps.push(defaultMaps[i]);
         }
     }
@@ -875,7 +876,10 @@ function saveMap() {
     const savedMapsStr = localStorage.getItem('savedMaps');
     let savedMaps = [];
     if(savedMapsStr) savedMaps = JSON.parse(savedMapsStr);
-    savedMaps.push(input_map_name.value)
+    if(savedMaps.indexOf(input_map_name.value) === -1){
+        console.log('pushing hard',input_map_name.value);
+        savedMaps.push(input_map_name.value)
+    }
 
     localStorage.setItem('savedMaps', JSON.stringify(savedMaps));
     alert('Map "'+input_map_name.value+'" saved! ');
