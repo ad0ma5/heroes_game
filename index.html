@@ -32,8 +32,8 @@
             overflow: auto;
         }
         #editor-container, #editor-container.active {
-            padding-top: 126px;
-            height: 86vh;
+            padding-top: 167px;
+            height: 74vh;
         }
         canvas {
             border: 0px solid #333;
@@ -50,10 +50,12 @@
         #editor-controls {
             top:0px;
         }
+        #editor-container button:hover,
         #controls button:hover{
             color: lightgreen;
             background: black;
         }
+        #editor-container button,
         #controls button{
             font-size: 30px;
             padding-top: 16px;
@@ -144,7 +146,7 @@
             text-align: center;
             padding-top: 25%;
             z-index: 1;
-            height: 70vh;
+            height: 85vh;
         }
         #map_menu{
 
@@ -164,6 +166,12 @@
         }
         #map_menu p.d{
             float:right;
+        }
+        button.show{
+            position: absolute;
+            top: 70px;
+            right:0;
+            z-index:1;
         }
         </style>
     </head>
@@ -199,7 +207,7 @@
             <canvas id="game-canvas" width="800" height="800"></canvas>
         </div>
         <div id="editor-container">
-            <canvas id="editor-canvas" width="800" height="800"></canvas>
+            <button class="show" onclick="toggleControls()">show</button>
             <div id="editor-controls">
                 <input type="text" id="map_name" name="map_name" placeholder="Map name" /><br />
                 <select id="terrain-type">
@@ -241,6 +249,7 @@
                 <br />
                 <input type="file" name="file" onchange="readText(event)" />
             </div>
+            <canvas id="editor-canvas" width="800" height="800"></canvas>
         </div>
         <a id="downloadAnchorElem" style="display:none"></a>
         <script src="script.js"></script>

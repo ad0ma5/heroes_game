@@ -66,6 +66,7 @@ const castleMenu = document.getElementById('castle_menu');
 const input_map_name = document.querySelector('#map_name');
 const map_menu = document.querySelector('#map_menu');
 const menu = document.getElementById('menu');
+const editormenu = document.getElementById('editor-controls');
 const gridSize = 20;
 const cellSize = 40;
 let currentPlayer = 1;
@@ -103,7 +104,12 @@ unitSprite.onload = function () {
     unitSpriteLoaded = true;
     goInit();
 }
-
+function toggleControls(){
+    if(editormenu.style.display === 'none')
+        editormenu.style.display = 'inline-block';
+        else
+        editormenu.style.display = 'none';
+}
 function toggleMenu(){
     if(menu.style.display === 'none')
         menu.style.display = 'inline-block';
