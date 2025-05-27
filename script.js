@@ -380,20 +380,6 @@ function drawUnits(ctx){
         const hpRatio = unit.health / unitsBlueprint[unit.type].health;
         const mvRatio = unit.movesLeft / unitsBlueprint[unit.type].movesLeft;
 
-        //if(unit.health > 0){
-        if(unit.type !== 'coin'){
-            gameCtx.fillStyle = 'black';
-            gameCtx.fillRect(px + 2, py , barWidth, barHeight+1);
-            gameCtx.fillStyle = hpRatio > 0.5 ? 'lightgreen' : hpRatio > 0.25 ? 'orange' : 'red';
-            gameCtx.fillRect(px + 2, py, barWidth * hpRatio, barHeight);
-        }
-        // Draw move bar
-        if(unit.type !== 'coin'){
-            gameCtx.fillStyle = 'black';
-            gameCtx.fillRect(px + 2, py + cellSize - barHeight-2, barWidth, barHeight+1);
-            gameCtx.fillStyle = mvRatio > 0.5 ? 'yellow' : mvRatio > 0.25 ? 'orange' : 'red';
-            gameCtx.fillRect(px + 2, py + cellSize - barHeight-2, barWidth * mvRatio, barHeight);
-        }
         //console.log('unit', unit, currentPlayer);
         if(currentPlayer === unit.player){
             if(unit.movesLeft === 0 ) 
@@ -413,16 +399,31 @@ function drawUnits(ctx){
         if(unit.type !== 'coin'){
             if(unit.player === 0)
                 ctx.lineWidth = 1;
-                else
-                ctx.lineWidth = 2;
-            ctx.strokeRect( (unit.x * cellSize)-2, (unit.y * cellSize)-2, cellSize+2, cellSize+2);
+            else
+                ctx.lineWidth = 1;
+            ctx.strokeRect( (unit.x * cellSize), (unit.y * cellSize), cellSize-2, cellSize-2);
             ctx.strokeStyle = 'black';
+        }
+
+        //if(unit.health > 0){
+        if(unit.type !== 'coin'){
+            gameCtx.fillStyle = 'black';
+            gameCtx.fillRect(px + 2, py , barWidth, barHeight+1);
+            gameCtx.fillStyle = hpRatio > 0.5 ? 'lightgreen' : hpRatio > 0.25 ? 'orange' : 'red';
+            gameCtx.fillRect(px + 2, py, barWidth * hpRatio, barHeight);
+        }
+        // Draw move bar
+        if(unit.type !== 'coin'){
+            gameCtx.fillStyle = 'black';
+            gameCtx.fillRect(px + 2, py + cellSize - barHeight-2, barWidth, barHeight+1);
+            gameCtx.fillStyle = mvRatio > 0.5 ? 'yellow' : mvRatio > 0.25 ? 'orange' : 'red';
+            gameCtx.fillRect(px + 2, py + cellSize - barHeight-2, barWidth * mvRatio, barHeight);
         }
     });
     if (selectedUnit) {
         ctx.strokeStyle = 'white';
-        ctx.lineWidth = 2;
-        ctx.strokeRect( (selectedUnit.x * cellSize), (selectedUnit.y * cellSize)-2, cellSize-2, cellSize+2);
+        ctx.lineWidth = 1;
+        ctx.strokeRect( (selectedUnit.x * cellSize), (selectedUnit.y * cellSize), cellSize-2, cellSize-2);
         ctx.strokeStyle = 'black';
 
     }
