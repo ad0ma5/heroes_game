@@ -68,6 +68,12 @@
             font-size: 16px;
             cursor: pointer;
         }
+        #editor-container #editor-controls button{
+            font-size:13px;
+            padding: 5px;
+            line-height: 15px;
+            margin: 0;
+        }
         select {
             padding: 5px;
             font-size: 16px;
@@ -169,7 +175,7 @@
         }
         button.show{
             position: absolute;
-            top: 70px;
+            top: 0;
             right:0;
             z-index:1;
         }
@@ -184,7 +190,6 @@
                 <div id="mode-controls">
                     <button onclick="switchMode('game')">Play Game</button>
                     <button onclick="switchMode('editor')">Map Editor</button>
-                    <button onclick="defaultLoad()">load autosave</button>
                     <button onclick="loadMap()">Load map</button>
                 </div>
             </div>
@@ -203,6 +208,7 @@
                 <button onclick="buy('knight')" >Knight 1000</button>
                 <button onclick="buy('archer')" >Archer 500</button>
                 <button onclick="buy('goblin')" >Goblin 700</button>
+                <button onclick="buy('dragon')" >Dragon 10000</button>
             </div>
             <canvas id="game-canvas" width="800" height="800"></canvas>
         </div>
@@ -231,6 +237,7 @@
                 </select>
                 <select id="unit-type">
                     <option value="none">None</option>
+                    <option value="dragon">Dragon</option>
                     <option value="knight">Knight</option>
                     <option value="archer">Archer</option>
                     <option value="goblin">Goblin</option>
@@ -245,6 +252,7 @@
                 <br />
                 <button onclick="saveMap()">Save Map</button>
                 <button onclick="clearMap()">Clear Map</button>
+                <button onclick="clearUnits()">Clear units</button>
                 <button onclick="downloadMap()">Download Map</button>
                 <br />
                 <input type="file" name="file" onchange="readText(event)" />

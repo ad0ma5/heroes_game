@@ -7,19 +7,30 @@ const defaultMaps = ["heroes","heroes1","heroes2", "heroes6"];
 const terrainDescriptions = {
     road: "move 2x",
     stoneroad: "move 2x",
-    castle: "can recruit units",
-    well: "can heal",
-    bridge: "can cross river",
-    goldmine: "can dig 5gold, goblins dig 20gold"
+    castle: "recruit units",
+    well: "heal",
+    bridge: "cross river",
+    tavern: "gain moves",
+    goldmine: "dig 5gold, goblins *5"
 };
 const unitsBlueprint = {
+    "dragon": {
+        "x":0,"y":0,
+        "type":"dragon",
+        "health":1000,
+        "attack":60,
+        "range":2,
+        "moves":8,
+        "player":0,
+        "gold": 1000
+    },
     "knight": {
         "x":0,"y":0,
         "type":"knight",
         "health":100,
         "attack":20,
-        "move":1,
-        "movesLeft":5,
+        "range":1,
+        "moves":5,
         "player":0,
         "gold": 10
     },
@@ -28,8 +39,8 @@ const unitsBlueprint = {
         "type":"archer",
         "health":50,
         "attack":10,
-        "move":2,
-        "movesLeft":6,
+        "range":2,
+        "moves":6,
         "player":0,
         "gold": 5
     },
@@ -38,8 +49,8 @@ const unitsBlueprint = {
         "type":"goblin",
         "health":70,
         "attack":15,
-        "move":1,
-        "movesLeft":4,
+        "range":1,
+        "moves":4,
         "player":0,
         "gold": 15
     },
@@ -48,8 +59,8 @@ const unitsBlueprint = {
         "type":"coin",
         "health":0,
         "attack":0,
-        "move":0,
-        "movesLeft":0,
+        "range":0,
+        "moves":0,
         "player":0,
         "gold": 50
     }
@@ -184,6 +195,11 @@ const DIRT_SPRITE_HEIGHT = 90;
 
 // Example row indexes for each type/player (customize based on your sprite sheet layout)
 const SPRITE_MAP = {
+    dragon: {
+        0: 10,
+        1: 10,
+        2: 10
+    },
     knight: {
         0: 6, // blue knight row
         1: 0, // blue knight row
@@ -272,11 +288,11 @@ function drawUnits(ctx){
         const barWidth = cellSize - 4;
         const barHeight = 2;
         const hpRatio = unit.health / unitsBlueprint[unit.type].health;
-        const mvRatio = unit.movesLeft / unitsBlueprint[unit.type].movesLeft;
+        const mvRatio = unit.moves / unitsBlueprint[unit.type].moves;
 
         //console.log('unit', unit, currentPlayer);
         if(currentPlayer === unit.player){
-            if(unit.movesLeft === 0 ) 
+            if(unit.moves === 0 ) 
                 ctx.strokeStyle = 'red';
                 else if (unit.player === 1)
                     ctx.strokeStyle = 'blue';
@@ -329,7 +345,7 @@ function drawUnits(ctx){
 function printUnit(unit){
     return `<ul>
 <li>t: ${unit.type} </li>
-<li>movesLeft: ${unit.movesLeft} </li>
+<li>moves: ${unit.moves} </li>
 <li>hlf: ${unit.health} </li>
 <li>atk:${unit.attack}</li>
 <li>p:${unit.player}</li>
@@ -395,8 +411,11 @@ function printCastleMenu(){
 
 function attakUnit(selectedUnit, unit){
     console.log(selectedUnit, unit);
-    unit.health -= selectedUnit.attack;
-    selectedUnit.movesLeft -= movesPerAttack;
+    if(gameMap[unit.y][unit.x] === "castle")
+        unit.health -= selectedUnit.attack/2;
+    else
+        unit.health -= selectedUnit.attack;
+    selectedUnit.moves -= movesPerAttack;
     if (unit.health <= 0) {
         //selectedUnit.x = x;
         //selectedUnit.y = y;
@@ -456,8 +475,8 @@ gameCanvas.addEventListener('click', (e) => {
         if (unit && unit.player !== currentPlayer ) {
             if(!unit.gold) unit.gold = 0;
             // Attack
-            if( unit.type === 'coin' && selectedUnit.movesLeft >= movesToDo && movesToDo <= 1 ){
-                selectedUnit.movesLeft -= movesToDo;
+            if( unit.type === 'coin' && selectedUnit.moves >= movesToDo && movesToDo <= 1 ){
+                selectedUnit.moves -= movesToDo;
                 selectedUnit.x = x;
                 selectedUnit.y = y;
                 selectedUnit.gold += unit.gold;
@@ -465,16 +484,16 @@ gameCanvas.addEventListener('click', (e) => {
 
             }
             else if( 
-                movesPerAttack <= selectedUnit.movesLeft 
+                movesPerAttack <= selectedUnit.moves 
                     && 
-                    movesToDo <= selectedUnit.movesLeft 
+                    movesToDo <= selectedUnit.moves 
                     && 
-                    movesToDo <= selectedUnit.move 
+                    movesToDo <= selectedUnit.range 
             ){
                 attakUnit(selectedUnit, unit);
                 /*
                         unit.health -= selectedUnit.attack;
-                        selectedUnit.movesLeft -= movesPerAttack;
+                        selectedUnit.moves -= movesPerAttack;
                         if (unit.health <= 0) {// coin, maybe something else later who is collectable 
                             selectedUnit.x = x;
                             selectedUnit.y = y;
@@ -490,11 +509,11 @@ gameCanvas.addEventListener('click', (e) => {
             console.log('here we move? else', movesToDo, movesToDeduct);
             // Move if terain allows
             if(
-                isPassableTerrain(gameMap[y][x]) && movesToDeduct <= selectedUnit.movesLeft
+                isPassableTerrain(gameMap[y][x]) && movesToDeduct <= selectedUnit.moves
             ){
                 selectedUnit.x = x;
                 selectedUnit.y = y;
-                selectedUnit.movesLeft -= movesToDeduct;
+                selectedUnit.moves -= movesToDeduct;
                 //console.log('it moved',selectedUnit);
             }else{
                 selectedUnit = null;
@@ -514,7 +533,7 @@ function getRandomInt(max) {
     return Math.floor(Math.random() * max);
 }
 function checkForUnitsArround(unit){
-    let move = unit.move;
+    let range = unit.move;
     for (let xi = unit.x-move; xi <= unit.x+move; xi++){
         for (let yi = unit.y-move; yi <= unit.y+move; yi++){
             let unitAt = getUnitAt(xi,yi);
@@ -586,13 +605,13 @@ function endTurn() {
     selectedUnit = null;
     // refill moves left for units
     gameUnits.forEach(unit => {
-        unit.movesLeft = unitsBlueprint[unit.type].movesLeft;
+        unit.moves = unitsBlueprint[unit.type].moves;
         //console.log('looping units', unit);
         if(gameMap[unit.y][unit.x] === "tavern"){
             //console.log('you are on the well');
-            unit.movesLeft += unitsBlueprint[unit.type].movesLeft/2;
+            unit.moves += unitsBlueprint[unit.type].moves/2;
 
-            if(unit.movesLeft > unitsBlueprint[unit.type].movesLeft * 2){ unit.movesLeft = unitsBlueprint[unit.type].movesLeft * 2; }
+            if(unit.moves > unitsBlueprint[unit.type].moves * 2){ unit.moves = unitsBlueprint[unit.type].moves * 2; }
         }
         if(gameMap[unit.y][unit.x] === "well"){
             //console.log('you are on the well');
@@ -608,6 +627,11 @@ function endTurn() {
         }
         if(gameMap[unit.y][unit.x] === "castle"){
             console.log('you are on the castle and if you have enough money you will gain one more unit');
+            unit.health += 5;
+            if(unit.health > unitsBlueprint[unit.type].health){ unit.health = unitsBlueprint[unit.type].health; }
+
+            unit.gold += 5;
+
 
         }
     });
@@ -754,7 +778,7 @@ editorCanvas.addEventListener('click', (e) => {
                         health: unitType === 'knight' ? 100 : 50,
                         attack: unitType === 'knight' ? 20 : 10,
                         move: unitType === 'knight' ? 1 : 2,
-                        movesLeft: unitType === 'knight' ? 5 : 6
+                        moves: unitType === 'knight' ? 5 : 6
                     });
                 */
         //}
@@ -835,6 +859,11 @@ function clearMap() {
     drawEditor();
 }
 
+function clearUnits(){
+
+    gameUnits = [];
+    drawEditor();
+}
 function downloadMap(){
     var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({map:gameMap,units:gameUnits}));
     var dlAnchorElem = document.getElementById('downloadAnchorElem');
