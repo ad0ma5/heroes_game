@@ -533,9 +533,9 @@ function getRandomInt(max) {
     return Math.floor(Math.random() * max);
 }
 function checkForUnitsArround(unit){
-    let range = unit.move;
-    for (let xi = unit.x-move; xi <= unit.x+move; xi++){
-        for (let yi = unit.y-move; yi <= unit.y+move; yi++){
+    let range = unit.range;
+    for (let xi = unit.x-range; xi <= unit.x+range; xi++){
+        for (let yi = unit.y-range; yi <= unit.y+range; yi++){
             let unitAt = getUnitAt(xi,yi);
             //console.log('unit at ',xi,yi,unitAt);
             if(unitAt && unitAt.player !== 0) return unitAt ;
