@@ -683,6 +683,17 @@ function deleteMap(name){
     localStorage.removeItem(name);
     printSavedMap(savedMaps);
 }
+function fixData(data){
+    for (let i =0;i<data.length;i++){
+        if (!data[i].range && data[i].move){
+            data[i].range = data[i].move || unitsBlueprint[data[i].type].range;
+        }
+        if (!data[i].moves && data[i].movesLeft){
+            data[i].moves =  data[i].movesLeft || unitsBlueprint[data[i].type].moves;
+        }
+    }
+    return data;
+}
 function loadMapByName(name){
     currentMapName = name;
     if(defaultMaps.indexOf(name) !== -1){
@@ -690,6 +701,7 @@ function loadMapByName(name){
             .then(response => response.json())
             .then(saved => { 
                 //console.log(saved) 
+                saved.units = fixData(saved.units);
                 gameMap = saved.map;
                 gameUnits = saved.units;
                 currentPlayer = 1;
@@ -831,6 +843,7 @@ function saveMap() {
 function loadAutosave(){
     if(localStorage.getItem('autosave')){
         const autosave = JSON.parse(localStorage.getItem('autosave'));
+        autosave.units = fixData(autosave.units);
         gameMap = autosave.map;
         gameUnits = autosave.units;
         currentPlayer = autosave.current;
