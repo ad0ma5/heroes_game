@@ -1,5 +1,5 @@
 
-const showCoords = false;
+let showCoords = false;
 const passableTerrain = [
     "grass","dirt","road","stoneroad","desert","castle","tavern","well","goldmine","bridge"        
 ];
@@ -81,6 +81,7 @@ const editormenu = document.getElementById('editor-controls');
 const gridSize = 20;
 const cellSize = 40;
 let currentPlayer = 1;
+let playersCount = 1;
 let players = [newPlayer(0), newPlayer(1), newPlayer(2)];
 let currentPlayerObj = players[0];
 let selectedUnit = null;
@@ -99,13 +100,13 @@ let unitSpriteLoaded = false;
 //dirt.src = "dirt.png";
 
 const dirtSprite = new Image();
-dirtSprite.src = "dirt_sprite.png"; // Your sprite sheet path
+dirtSprite.src = "img/dirt_sprite.png"; // Your sprite sheet path
 
 const dirtSpriteNew = new Image();
-dirtSpriteNew.src = "dirt_sprite_new.png"; // Your sprite sheet path
+dirtSpriteNew.src = "img/dirt_sprite_new.png"; // Your sprite sheet path
 
 const unitSprite = new Image();
-unitSprite.src = "sprite.png"; // Your sprite sheet path
+unitSprite.src = "img/sprite.png"; // Your sprite sheet path
 
 dirtSprite.onload = function () {
     dirtSpriteLoaded = true;
@@ -164,9 +165,10 @@ function newPlayer(id){
 function goInit(){
     if(dirtSpriteLoaded && unitSpriteLoaded){
         console.log('goInit');
-        // Initialize
-        switchMode('game');
         defaultLoad();
+        // Initialize
+        switchMode('gamesingle');
+
         //    loadMap();
     }
 }
@@ -176,16 +178,24 @@ function createEmptyMap() {
 
 function switchMode(newMode) {
     mode = newMode;
-    document.getElementById('game-container').classList.toggle('active', mode === 'game');
-    document.body.classList.toggle('active', mode === 'game');
+    document.getElementById('game-container').classList.toggle('active', mode === 'game' || mode === "gamesingle");
+    document.body.classList.toggle('active', mode === 'game' || mode === "gamesingle");
     document.getElementById('editor-container').classList.toggle('active', mode === 'editor');
     if (mode === 'game') {
+        reinit()
+        playersCount = 2;
+        drawGame();
+        showOverlay("Turn for Player "+currentPlayer);
+    } else if (mode === 'gamesingle') {
+        reinit()
+        playersCount = 1;
         drawGame();
         showOverlay("Turn for Player "+currentPlayer);
     } else {
         map_name.value = currentMapName;
         drawEditor();
     }
+    document.getElementById('status').textContent = printPlayer(currentPlayerObj);
 }
 
 const SPRITE_WIDTH = cellSize;
@@ -371,17 +381,19 @@ function drawEditor() {
 function checkWin(){
     let count1 = 0;
     let count2 = 0;
+    let count0 = 0;
     gameUnits.forEach(unit => {
         if(unit.player === 1) count1++;
-            else count2++;
+        if(unit.player === 2) count2++;
+        else count0++;
     });
     //console.log('checking win 1=',count1,'2=',count2);
-    if(count1 ===0){
+    if(count1 ===0 && count0 === 0){
         alert("player 2 won!!!");
         reinit();
         loadMap();
     }
-    if(count2 ===0){
+    if(count2 ===0 && count0 === 0){
         alert("player 1 won!!!");
         reinit();
         loadMap();
@@ -427,8 +439,9 @@ function attakUnit(selectedUnit, unit){
 }
 //GAME LOOP
 gameCanvas.addEventListener('click', (e) => {
+    console.log('click');
     castleMenu.style.display = "none";
-    if (mode !== 'game') return;
+    if (mode !== 'game' && mode !== 'gamesingle' ) return;
     const rect = gameCanvas.getBoundingClientRect();
     const x = Math.floor((e.clientX - rect.left) / cellSize);
     const y = Math.floor((e.clientY - rect.top) / cellSize);
@@ -538,22 +551,22 @@ function checkForUnitsArround(unit){
         for (let yi = unit.y-range; yi <= unit.y+range; yi++){
             let unitAt = getUnitAt(xi,yi);
             //console.log('unit at ',xi,yi,unitAt);
-            if(unitAt && unitAt.player !== 0) return unitAt ;
+            if(unitAt && unitAt.player !== unit.player) return unitAt ;
         }
     }
 
     return null;
 }
-function doAI(){
-    console.log("AI DOING AI SUFF hERE...");
+function doAI(playerid){
+    console.log("AI DOING AI SUFF hERE...", playerid);
     gameUnits.forEach(unit => {
-        if(unit.player === 0 && unit.type !== 'coin'){
+        if(unit.player === playerid && unit.type !== 'coin'){
             let x,y;
             //should maybe check first all locations for possible attack before / if doing random move
             let unitAt = null;
             unitAt = checkForUnitsArround(unit);
             //if(unitAt)
-            if(!unitAt || unitAt.player === 0 || unitAt.type === 'coin'){
+            if(!unitAt || unitAt.player === unit.player || unitAt.type === 'coin'){
                 console.log('ai did not found unit', );
                 let r = getRandomInt(4);
                 switch(r){
@@ -578,16 +591,17 @@ function doAI(){
                 if (y < 0) y = 0;
                 if (y > gridSize-1) y = gridSize-1;
 
-                //console.log(x,y, gameMap[y][x],'dd');
+                console.log(playerid, 'will move to ',x,y, gameMap[y][x],'dd', unit);
                 if(isPassableTerrain(gameMap[y][x]) && !getUnitAt(x,y)){
+
                     unit.x = x;
                     unit.y = y;
                 }
             }else{
                 console.log(unit.move,'ai attak unit', unitAt);
-                if(unitAt.player !== 0){
+                if(unitAt.player !== playerid){
                     attakUnit(unit, unitAt);
-                    console.log('ai did hurt unit', unitAt);
+                    console.log(playerid, 'ai did hurt unit', unitAt);
                 }
             }
         }
@@ -595,6 +609,11 @@ function doAI(){
 }
 
 function endTurn() {
+
+    //checkWin();
+    
+    selectedStatus.innerHTML = "";
+
     currentPlayer++;
     currentPlayer = currentPlayer === 3 ? 0 : currentPlayer;
     currentPlayerObj = players[currentPlayer-1];
@@ -637,10 +656,16 @@ function endTurn() {
     });
 
 
-    if(currentPlayer === 0){ 
-        doAI();
-        endTurn();
+    if(playersCount === 1 && currentPlayer > 1){
+        //currentPlayer++;
+        doAI(currentPlayer);
         drawGame();
+        endTurn();
+    }
+    if(currentPlayer === 0){ 
+        doAI(0);
+        drawGame();
+        endTurn();
     }else{
         document.getElementById('status').textContent = printPlayer(currentPlayerObj);
         drawGame();
@@ -649,7 +674,9 @@ function endTurn() {
 }
 function printPlayer(player){
     //return `Player ${currentPlayer}'s Turn, turnCount=${turnCount} \nMoney:${player.money} exp:${{player}.exp}`;
-    return `Player ${currentPlayer}' turn:${turnCount} map:${currentMapName}`;
+    let pre = "multi";
+    if(playersCount === 1) pre = "single";
+    return `${pre} P ${currentPlayer} t:${turnCount} m:${currentMapName}`;
 }
 
 function defaultLoad(){
@@ -697,7 +724,7 @@ function fixData(data){
 function loadMapByName(name){
     currentMapName = name;
     if(defaultMaps.indexOf(name) !== -1){
-        fetch(name+".json")
+        fetch("maps/"+name+".json")
             .then(response => response.json())
             .then(saved => { 
                 //console.log(saved) 

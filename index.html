@@ -16,7 +16,7 @@
         body.active{
             background: lightgreen;
             background-size:93px 166px;
-            background: url("dirt_sprite.png") -150px 0px repeat-x;
+            background: url("img/dirt_sprite.png") -150px 0px repeat-x;
             background-blend-mode: multiply;
             background-color: teal;
         }
@@ -187,7 +187,8 @@
                 <div id="status" >Player 1, turn 0</div>
             <div id="menu" style="display: none;"> 
                 <div id="mode-controls">
-                    <button onclick="switchMode('game')">Play Game</button>
+                    <button onclick="switchMode('gamesingle')">Play Single</button>
+                    <button onclick="switchMode('game')">Play Duel</button>
                     <button onclick="switchMode('editor')">Map Editor</button>
                     <button onclick="loadMap()">Load map</button>
                 </div>
